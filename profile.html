@@ -50,7 +50,7 @@
 
       let ordersHtml = '';
       if (orders.length === 0) {
-        ordersHtml = `<div class="empty-orders"><div class="empty-orders__icon">📋</div><p>目前沒有租借訂單</p><p style="margin-top:8px;"><a href="index.html" style="color:var(--amber); font-weight:600;">前往瀏覽器材 →</a></p></div>`;
+        ordersHtml = `<div class="empty-orders"><div class="empty-orders__icon" style="font-size:18px; color:var(--t3);">尚無訂單</div><p>目前沒有租借訂單</p><p style="margin-top:8px;"><a href="index.html" style="color:var(--amber); font-weight:600;">前往瀏覽器材 →</a></p></div>`;
       } else {
         ordersHtml = orders.map(o => {
           const st = ORDER_STATE_MAP[o.order_state] || { label: o.order_state, cls: "unpaid" };
@@ -60,8 +60,8 @@
               <span class="order-card__id">訂單 #${o.order_id}</span>
               <span class="order-state-badge order-state--${st.cls}">${st.label}</span>
             </div>
-            <div class="order-card__dates">📅 ${o.rent_date} → ${o.return_date}</div>
-            <div class="order-card__items">📦 品項：${itemNames}</div>
+            <div class="order-card__dates">租借期間：${o.rent_date} → ${o.return_date}</div>
+            <div class="order-card__items">品項：${itemNames}</div>
             <div class="order-card__total">${o.total_rental != null ? 'NT$ ' + Number(o.total_rental).toLocaleString('zh-TW') : '—'}</div>
           </div>`;
         }).join('');
@@ -82,19 +82,19 @@
           </div>
           <div class="profile-info-grid">
             <div class="profile-info-item">
-              <div class="profile-info-item__label">📧 電子信箱</div>
+              <div class="profile-info-item__label">電子信箱</div>
               <div class="profile-info-item__value">${member.email}</div>
             </div>
             <div class="profile-info-item">
-              <div class="profile-info-item__label">📱 聯絡電話</div>
+              <div class="profile-info-item__label">聯絡電話</div>
               <div class="profile-info-item__value">${member.phone_number || '未填寫'}</div>
             </div>
             <div class="profile-info-item">
-              <div class="profile-info-item__label">📅 註冊日期</div>
+              <div class="profile-info-item__label">註冊日期</div>
               <div class="profile-info-item__value">${member.reg_date}</div>
             </div>
             <div class="profile-info-item">
-              <div class="profile-info-item__label">📋 訂單數量</div>
+              <div class="profile-info-item__label">訂單數量</div>
               <div class="profile-info-item__value">${orders.length} 筆</div>
             </div>
           </div>
@@ -102,7 +102,7 @@
 
         <!-- Orders -->
         <div>
-          <h2 class="orders-section__title">📦 我的租借訂單</h2>
+          <h2 class="orders-section__title">我的租借訂單</h2>
           ${ordersHtml}
         </div>
       `;
