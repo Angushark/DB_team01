@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LensRent — 攝影器材租賃平台</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
+</head>
+<body>
+
+  <!-- ══ TOP UTILITY BAR ═══════════════════════════════════════════════════ -->
+  <div class="utility-bar">
+    <div class="container">
+      <span>攝影器材租賃平台 · 全站器材皆有保險保障</span>
+      <div class="utility-bar__links">
+        <span>客服中心</span>
+        <span class="utility-bar__sep">|</span>
+        <span>出租方專區</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN HEADER ═══════════════════════════════════════════════════════ -->
+  <header class="main-header">
+    <div class="container">
+      <!-- Row 1: Logo + Search + Actions -->
+      <div class="header-row">
+        <!-- Logo -->
+        <div class="logo">
+          <span class="logo__icon">📷</span>
+          <div>
+            <div class="logo__text">LensRent</div>
+            <div class="logo__sub">攝影器材租賃</div>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-wrap">
+          <span class="search-wrap__icon icon">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </span>
+          <input type="text" class="search-input" id="search-input" placeholder="搜尋器材品牌、名稱、型號⋯">
+          <button class="search-clear" id="search-clear">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Actions (rendered by JS based on login state) -->
+        <div class="header-actions">
+          <div id="auth-buttons"></div>
+          <button class="btn-cart">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+            租借清單
+            <span class="cart-badge" id="cart-badge">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Row 2: Category nav -->
+      <nav class="cat-nav hide-scrollbar" id="cat-nav">
+        <!-- Rendered by JS -->
+      </nav>
+    </div>
+  </header>
+
+  <!-- ══ MAIN CONTENT ══════════════════════════════════════════════════════ -->
+  <main class="container">
+
+    <!-- ── FILTERED VIEW (hidden by default) ───────────────────────────── -->
+    <section class="filtered-view hidden" id="filtered-view">
+      <!-- Rendered by JS -->
+    </section>
+
+    <!-- ── HOME VIEW ───────────────────────────────────────────────────── -->
+    <div id="home-view">
+
+      <!-- ── HERO BANNER ─────────────────────────────────────────────── -->
+      <section class="hero">
+        <div class="hero__inner" id="hero-inner">
+          <div class="hero__circle hero__circle--1" id="hero-circle-1"></div>
+          <div class="hero__circle hero__circle--2" id="hero-circle-2"></div>
+          <div class="hero__content">
+            <div class="hero__label" id="hero-label">LensRent 精選</div>
+            <h2 class="hero__title" id="hero-title"></h2>
+            <p class="hero__sub" id="hero-sub"></p>
+            <button class="hero__cta" id="hero-cta"></button>
+          </div>
+          <div class="hero__dots" id="hero-dots">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ── QUICK CATEGORY TILES ────────────────────────────────────── -->
+      <section class="cat-tiles">
+        <div class="cat-tiles__grid" id="cat-tiles-grid">
+          <!-- Static: these don't change, rendered once -->
+          <button class="cat-tile" data-cat="mirrorless"><span class="cat-tile__icon">📷</span><span class="cat-tile__label">微單眼</span></button>
+          <button class="cat-tile" data-cat="compact"><span class="cat-tile__icon">📸</span><span class="cat-tile__label">類單眼</span></button>
+          <button class="cat-tile" data-cat="action"><span class="cat-tile__icon">🎬</span><span class="cat-tile__label">運動相機</span></button>
+          <button class="cat-tile" data-cat="cinema"><span class="cat-tile__icon">🎥</span><span class="cat-tile__label">電影機</span></button>
+          <button class="cat-tile" data-cat="lens"><span class="cat-tile__icon">🔭</span><span class="cat-tile__label">鏡頭</span></button>
+          <button class="cat-tile" data-cat="tripod"><span class="cat-tile__icon">📐</span><span class="cat-tile__label">腳架</span></button>
+          <button class="cat-tile" data-cat="memory"><span class="cat-tile__icon">💾</span><span class="cat-tile__label">記憶卡</span></button>
+          <button class="cat-tile" data-cat="adapter"><span class="cat-tile__icon">⭕</span><span class="cat-tile__label">轉接環</span></button>
+          <button class="cat-tile" data-cat="bag"><span class="cat-tile__icon">🎒</span><span class="cat-tile__label">相機包</span></button>
+          <button class="cat-tile" data-cat="battery"><span class="cat-tile__icon">🔋</span><span class="cat-tile__label">電池</span></button>
+          <button class="cat-tile" data-cat="light"><span class="cat-tile__icon">💡</span><span class="cat-tile__label">燈光</span></button>
+          <button class="cat-tile" data-cat="stabilizer"><span class="cat-tile__icon">🎯</span><span class="cat-tile__label">穩定器</span></button>
+        </div>
+      </section>
+
+      <!-- ── HOT PRODUCTS ────────────────────────────────────────────── -->
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-head__title"><span style="color:var(--amber)">🔥</span> 熱門器材</h2>
+            <p class="section-head__sub">最多人租借的攝影器材</p>
+          </div>
+          <button class="section-head__link">查看全部 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+        <div class="scroll-row">
+          <button class="scroll-row__btn scroll-row__btn--left" id="scroll-left">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="scroll-row__track hide-scrollbar" id="hot-track">
+            <!-- Rendered by JS -->
+          </div>
+          <button class="scroll-row__btn scroll-row__btn--right" id="scroll-right">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ── PROMO TILES ─────────────────────────────────────────────── -->
+      <section class="section">
+        <div class="promo-grid" id="promo-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- ── NEW ARRIVALS ────────────────────────────────────────────── -->
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-head__title"><span style="color:var(--green)">✨</span> 新品上架</h2>
+            <p class="section-head__sub">最新加入的器材與配件</p>
+          </div>
+          <button class="section-head__link">查看全部 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+        <div class="product-grid" id="new-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- ── EQUIPMENT ───────────────────────────────────────────────── -->
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-head__title"><span style="color:var(--amber)">📷</span> 相機 / 鏡頭</h2>
+            <p class="section-head__sub">微單眼、類單眼、運動相機、電影機、鏡頭</p>
+          </div>
+          <button class="section-head__link">查看全部 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+        <div class="product-grid" id="equip-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- ── ACCESSORIES ─────────────────────────────────────────────── -->
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-head__title"><span style="color:var(--blue)">🛠️</span> 配件周邊</h2>
+            <p class="section-head__sub">腳架、電池、記憶卡、燈光、穩定器、相機包</p>
+          </div>
+          <button class="section-head__link">查看全部 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+        <div class="product-grid" id="acc-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+    </div><!-- /home-view -->
+  </main>
+
+  <!-- ══ FOOTER ════════════════════════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <div class="container" style="padding-top:36px; padding-bottom:24px;">
+      <div class="footer-grid">
+        <!-- Col 1: Brand -->
+        <div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+            <span style="font-size:20px;">📷</span>
+            <span class="mono" style="font-weight:700; font-size:15px; color:var(--amber-text);">LensRent</span>
+          </div>
+          <p class="footer-col__text">專業攝影器材租賃平台，從入門到專業，讓每位創作者都能用最好的器材說故事。</p>
+        </div>
+        <!-- Col 2: Service -->
+        <div>
+          <h4 class="footer-col__title">服務</h4>
+          <p class="footer-col__link">租借流程說明</p>
+          <p class="footer-col__link">出租方須知</p>
+          <p class="footer-col__link">保險與保障</p>
+          <p class="footer-col__link">常見問題</p>
+        </div>
+        <!-- Col 3: Account -->
+        <div>
+          <h4 class="footer-col__title">帳戶</h4>
+          <p class="footer-col__link">登入 / 註冊</p>
+          <p class="footer-col__link">我的訂單</p>
+          <p class="footer-col__link">租借紀錄</p>
+          <p class="footer-col__link">帳戶設定</p>
+        </div>
+        <!-- Col 4: Contact -->
+        <div>
+          <h4 class="footer-col__title">聯絡</h4>
+          <p class="footer-col__link">客服信箱: support@lensrent.tw</p>
+          <p class="footer-col__link">LINE: @lensrent</p>
+          <p class="footer-col__link">營業時間: 10:00–20:00</p>
+        </div>
+      </div>
+      <!-- Bottom bar -->
+      <div class="footer-bottom">
+        <p class="footer-bottom__copy">© 2026 LensRent · 攝影器材租賃平台</p>
+        <div class="footer-bottom__links">
+          <span>隱私權政策</span>
+          <span>服務條款</span>
+          <span>退租辦法</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ══ TOAST ═════════════════════════════════════════════════════════════ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ══ SCRIPTS ═══════════════════════════════════════════════════════════ -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
