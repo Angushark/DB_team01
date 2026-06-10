@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訂單管理 — LensRent</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
+  <style>
+    .page-header { background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px; position:sticky; top:0; z-index:50; }
+    .page-header .inner { display:flex; align-items:center; justify-content:space-between; }
+    .order-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 20px; margin-bottom:14px; }
+    .order-card__header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .order-card__id { font-size:15px; font-weight:700; color:var(--t1); }
+    .order-card__dates { font-size:13px; color:var(--t2); margin-bottom:6px; }
+    .order-card__items { font-size:12px; color:var(--t3); margin-bottom:8px; }
+    .order-card__total { font-size:16px; font-weight:700; color:var(--amber); }
+    .order-card__actions { display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+    .btn-action { padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:none; text-decoration:none; display:inline-flex; align-items:center; }
+    .btn-action--view { background:var(--amber-light,#fffbeb); color:var(--amber); }
+    .btn-action--delete { background:#fef2f2; color:var(--red,#dc2626); }
+    .btn-action--view:hover { background:var(--amber); color:#fff; }
+    .btn-action--delete:hover { background:var(--red,#dc2626); color:#fff; }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="container inner">
+      <a href="index.html" class="logo">
+        <span class="logo__icon">📷</span>
+        <div><div class="logo__text">LensRent</div><div class="logo__sub">攝影器材租賃</div></div>
+      </a>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <a href="cart.html" class="btn-login" style="text-decoration:none;">🛒 租借清單</a>
+        <a href="index.html" class="btn-login" style="text-decoration:none;">← 回首頁</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding:28px 16px 60px;">
+    <h1 style="font-size:22px;font-weight:700;margin-bottom:4px;">訂單管理</h1>
+    <p style="font-size:13px;color:var(--t3);margin-bottom:24px;">查看、編輯或刪除你的租借訂單</p>
+    <div id="orders-content">
+      <div style="text-align:center;padding:60px;color:var(--t3);">⏳ 載入中⋯</div>
+    </div>
+  </main>
+
+  <script src="js/orders.js"></script>
+</body>
+</html>

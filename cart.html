@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>租借清單 — LensRent</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
+  <style>
+    .page-header { background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px; position:sticky; top:0; z-index:50; }
+    .page-header .inner { display:flex; align-items:center; justify-content:space-between; }
+    .cart-layout { display:grid; grid-template-columns:1fr 360px; gap:24px; align-items:start; margin-top:28px; }
+    @media(max-width:768px){ .cart-layout{ grid-template-columns:1fr; } }
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; }
+    .panel__title { font-size:15px; font-weight:700; color:var(--t1); margin-bottom:18px; }
+    .cart-table { width:100%; border-collapse:collapse; }
+    .cart-table th { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--t3); padding:8px 12px; border-bottom:1px solid var(--border); text-align:left; }
+    .cart-table td { padding:12px; border-bottom:1px solid var(--border); font-size:13px; color:var(--t2); vertical-align:middle; }
+    .cart-table tr:last-child td { border-bottom:none; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:12px; font-weight:600; color:var(--t2); margin-bottom:6px; }
+    .form-input { width:100%; padding:9px 12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--t1); box-sizing:border-box; }
+    .form-input:focus { outline:none; border-color:var(--amber); }
+    .flatpickr-input { width:100%; padding:9px 12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--t1); box-sizing:border-box; cursor:pointer; }
+    .flatpickr-calendar { background:var(--card); border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,.08); }
+    .flatpickr-day:hover { background:var(--amber-light); }
+    .flatpickr-day.selected, .flatpickr-day.selected:hover { background:var(--amber); border-color:var(--amber); color:#fff; }
+    .subtotal-box { background:var(--bg); border-radius:10px; padding:14px 16px; margin-bottom:16px; }
+    .btn-submit { width:100%; padding:11px; background:var(--amber); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; }
+    .btn-submit:hover { background:var(--amber-dark, #b45309); }
+    .btn-submit:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-remove { padding:4px 10px; background:transparent; border:1px solid var(--red); color:var(--red); border-radius:6px; font-size:11px; cursor:pointer; }
+    .btn-remove:hover { background:var(--red); color:#fff; }
+    .msg-box { padding:12px 16px; border-radius:10px; font-size:13px; margin-bottom:14px; display:none; }
+    .msg-box.error { background:#fef2f2; color:var(--red); border:1px solid #fecaca; display:block; }
+    .msg-box.success { background:#f0fdf4; color:var(--green); border:1px solid #bbf7d0; display:block; }
+    .login-hint { background:var(--amber-light); border:1px solid #fde68a; border-radius:10px; padding:14px 16px; font-size:13px; color:#92400e; margin-bottom:14px; }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="container inner">
+      <a href="index.html" class="logo">
+        <span class="logo__icon">📷</span>
+        <div><div class="logo__text">LensRent</div><div class="logo__sub">攝影器材租賃</div></div>
+      </a>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <a href="orders.html" class="btn-login" style="text-decoration:none;">訂單管理</a>
+        <a href="index.html" class="btn-login" style="text-decoration:none;">← 繼續瀏覽</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-bottom:60px;">
+    <h1 style="font-size:22px;font-weight:700;margin-top:28px;margin-bottom:4px;">🛒 租借清單</h1>
+    <p style="font-size:13px;color:var(--t3);margin-bottom:0;">確認品項後建立租借訂單</p>
+
+    <div class="cart-layout">
+      <!-- Cart Items -->
+      <div>
+        <div id="cart-msg" class="msg-box"></div>
+        <div class="panel" id="cart-panel">
+          <div style="text-align:center;padding:40px;color:var(--t3);">⏳ 載入中⋯</div>
+        </div>
+        <div style="margin-top:12px;">
+          <button id="btn-clear" class="btn-remove" style="display:none;">清空清單</button>
+        </div>
+      </div>
+
+      <!-- Create Order -->
+      <div class="panel">
+        <div class="panel__title">建立租借訂單</div>
+        <div id="order-msg" class="msg-box"></div>
+        <div id="login-hint" class="login-hint" style="display:none;">
+          請先 <a href="login.html" style="color:var(--amber);font-weight:700;">登入</a> 才能建立訂單
+        </div>
+        <div class="form-group">
+          <label>租借日期</label>
+          <input type="text" id="rent-date" class="flatpickr-input" placeholder="選擇日期" readonly>
+        </div>
+        <div class="form-group">
+          <label>歸還日期</label>
+          <input type="text" id="return-date" class="flatpickr-input" placeholder="選擇日期" readonly>
+        </div>
+        <div class="subtotal-box" id="subtotal-box">
+          <div style="font-size:11px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">每日小計</div>
+          <div id="subtotal-text" style="font-size:22px;font-weight:700;color:var(--amber);">NT$ 0</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;">總金額依租借天數計算</div>
+        </div>
+        <button id="btn-create" class="btn-submit">確認建立訂單</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
+  <script src="js/cart.js"></script>
+</body>
+</html>
