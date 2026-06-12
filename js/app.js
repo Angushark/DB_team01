@@ -93,50 +93,24 @@ function getFilteredProducts() {
 }
 function isShowFiltered() { return state.activeCat !== "all" || state.search.trim(); }
 
-async function addToCart(product) {
-  if (product.original_rent_state !== "available") return;
-  try {
-    const r = await fetch("api/cart.php", {
-      method: "POST", credentials: "same-origin",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "add", item_id: product.id, name: product.name, rental: product.rental }),
-    });
-    const data = await r.json();
-    if (data.success) {
-      state.cartCount = data.count;
-      state.cartItemIds.add(product.id);
-      showToast(product.name);
-      render();
-    }
-  } catch (e) {}
-}
-
 // ── UI helpers ───────────────────────────────────────────────────────────────
-function showToast(name) {
-  const toast = $("#toast");
-  toast.textContent = "✓ 已將「" + name + "」加入租借清單";
-  toast.classList.add("visible");
-  clearTimeout(state.toastTimer);
-  state.toastTimer = setTimeout(() => toast.classList.remove("visible"), 2200);
-}
-
 // ── Render functions ─────────────────────────────────────────────────────────
 function renderProductCard(p, compact) {
   const available = p.original_rent_state === "available";
-  const rented    = p.original_rent_state === "rented";
   const inCart    = getCartIds().has(p.id);
   const stClass   = available ? "available" : "rented";
   let corner = "";
   if (p.isNew) corner = '<span class="badge-corner badge-corner--new">NEW</span>';
   else if (p.hot) corner = '<span class="badge-corner badge-corner--hot">🔥 熱門</span>';
-  let btnC, btnT;
-  if (!available) { btnC = "btn-add--rented"; btnT = rented ? "已出租" : "不可用"; }
-  else if (inCart) { btnC = "btn-add--incart"; btnT = "✓ 已加入"; }
-  else { btnC = "btn-add--available"; btnT = "+ 租借"; }
   const imgTag = p.url
     ? `<img src="${p.url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.style.display='none';this.nextSibling.style.display='block'"><span class="card-img__emoji" style="display:none">${p.img}</span>`
     : `<span class="card-img__emoji">${p.img}</span>`;
-  return `<div class="product-card${compact ? " compact" : ""}">
+  const hint = inCart
+    ? `<span style="font-size:11px;color:var(--green);font-weight:600;">✓ 已加入</span>`
+    : (available
+      ? `<span style="font-size:11px;color:var(--amber);font-weight:600;">查看詳情 →</span>`
+      : `<span style="font-size:11px;color:var(--t3);">${p.rent_state}</span>`);
+  return `<a href="item.html?id=${p.id}" class="product-card${compact ? " compact" : ""}" style="text-decoration:none;color:inherit;display:block;">
     <div class="card-img">${imgTag}
       <span class="badge-state badge-state--${stClass}"><span class="badge-state__dot"></span>${p.rent_state}</span>${corner}
     </div>
@@ -148,10 +122,10 @@ function renderProductCard(p, compact) {
       <h3 class="card-info__name">${p.name}</h3>
       <div class="card-info__bottom">
         <span class="card-info__price">${fmt(p.rental)}<span class="card-info__price-unit">/日</span></span>
-        <button class="btn-add-trigger btn-add ${btnC}" data-product-id="${p.id}" ${!available ? "disabled" : ""}>${btnT}</button>
+        ${hint}
       </div>
     </div>
-  </div>`;
+  </a>`;
 }
 
 function renderBanner() {
@@ -241,13 +215,6 @@ function initEvents() {
   $("#scroll-left").addEventListener("click", () => { $("#hot-track").scrollBy({ left: -260, behavior: "smooth" }); });
   $("#scroll-right").addEventListener("click", () => { $("#hot-track").scrollBy({ left: 260, behavior: "smooth" }); });
   document.body.addEventListener("click", e => {
-    const ab = e.target.closest(".btn-add-trigger");
-    if (ab && !ab.disabled) {
-      e.stopPropagation();
-      const p = state.items.find(p => p.id === ab.dataset.productId);
-      if (p) addToCart(p).catch(() => {});
-      return;
-    }
     if (e.target.id === "clear-filter") { state.activeCat = "all"; render(); }
   });
 }

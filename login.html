@@ -62,6 +62,7 @@
       try {
         const res = await fetch("api/login.php", {
           method: "POST",
+          credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ member_id: parseInt(member_id), password })
         });
@@ -70,7 +71,8 @@
         if (data.success) {
           localStorage.setItem("lensrent_user", JSON.stringify(data.member));
           showMsg("登入成功！即將跳轉⋯", "success");
-          setTimeout(() => window.location.href = "profile.html", 1000);
+          const redirect = new URLSearchParams(location.search).get("redirect") || "profile.html";
+          setTimeout(() => window.location.href = redirect, 1000);
         } else {
           showMsg(data.message, "error");
         }

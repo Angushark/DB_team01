@@ -5,7 +5,9 @@ const STATE_MAP = {
   completed: "訂單完成", cancelled: "不成立",
 };
 const order_id = new URLSearchParams(location.search).get("id");
-let allItems = [];  // all DB items for the add-item dropdown
+let allItems = [];
+let editRentPicker = null;
+let editReturnPicker = null;
 
 flatpickr.localize(flatpickr.l10ns.zh_tw);
 
@@ -19,14 +21,8 @@ function renderDetail(order) {
         <td>${i.type}</td>
         <td>${i.brand}</td>
         <td style="font-family:monospace;color:var(--amber);">${fmt(i.rental)}</td>
-        <td><button class="btn-danger" data-item="${i.item_id}">移除</button></td>
       </tr>`).join("")
-    : `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--t3);">尚無明細</td></tr>`;
-
-  const otherItems = allItems.filter(i => !order.items.find(x => x.item_id === i.item_id) && i.rent_state === 'available');
-  const dropdownOpts = otherItems.map(i =>
-    `<option value="${i.item_id}">${i.item_id} — ${i.brand} ${i.name} (${fmt(i.rental)}/日)</option>`
-  ).join("");
+    : `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--t3);">尚無明細</td></tr>`;
 
   document.getElementById("detail-content").innerHTML = `
     ${location.search.includes("new=1") ? '<div class="msg-box success" style="display:block;">✓ 訂單已建立成功！</div>' : ""}
@@ -79,33 +75,39 @@ function renderDetail(order) {
       <div class="panel__title">訂單明細</div>
       <div id="items-msg" class="msg-box"></div>
       <table class="items-table">
-        <thead><tr><th>編號</th><th>名稱</th><th>類型</th><th>品牌</th><th>日租金</th><th></th></tr></thead>
+        <thead><tr><th>編號</th><th>名稱</th><th>類型</th><th>品牌</th><th>日租金</th></tr></thead>
         <tbody id="items-tbody">${itemRows}</tbody>
       </table>
-      ${dropdownOpts ? `<div class="add-item-row">
-        <select id="add-item-select" class="form-input" style="flex:1;">
-          <option value="">＋ 選擇要新增的器材</option>${dropdownOpts}
-        </select>
-        <button id="btn-add-item" class="btn-primary">新增</button>
-      </div>` : ""}
     </div>`;
 
-  // Init flatpickr
-  const rentPicker = flatpickr("#edit-rent", {
+  // Init flatpickr — store at module level so save handler can lock/unlock them
+  editRentPicker = flatpickr("#edit-rent", {
     dateFormat: "Y-m-d", altInput: true, altFormat: "Y年n月j日",
     defaultDate: order.rent_date,
-    onChange: (d) => { if (d[0]) returnPicker.set("minDate", d[0]); },
+    onChange: (d) => { if (d[0]) editReturnPicker.set("minDate", d[0]); },
   });
-  const returnPicker = flatpickr("#edit-return", {
+  editReturnPicker = flatpickr("#edit-return", {
     dateFormat: "Y-m-d", altInput: true, altFormat: "Y年n月j日",
     defaultDate: order.return_date, minDate: order.rent_date,
   });
 
+  function lockEditForm(lock) {
+    const saveBtn = document.getElementById("btn-save");
+    const stateEl = document.getElementById("edit-state");
+    if (saveBtn) { saveBtn.disabled = lock; if (lock) saveBtn.textContent = "儲存中⋯"; else saveBtn.textContent = "儲存變更"; }
+    if (stateEl) stateEl.disabled = lock;
+    if (editRentPicker)   editRentPicker.set("clickOpens", !lock);
+    if (editReturnPicker) editReturnPicker.set("clickOpens", !lock);
+  }
+
   // Save button
-  document.getElementById("btn-save").addEventListener("click", async () => {
+  document.getElementById("btn-save").addEventListener("click", async (e) => {
+    const btn = e.currentTarget;
+    if (btn.disabled) return;
     const rent_date   = document.getElementById("edit-rent").value;
     const return_date = document.getElementById("edit-return").value;
     const order_state = document.getElementById("edit-state").value;
+    lockEditForm(true);
     try {
       const r = await fetch("api/update_order.php", {
         method: "POST", credentials: "same-origin",
@@ -113,45 +115,16 @@ function renderDetail(order) {
         body: JSON.stringify({ order_id, rent_date, return_date, order_state }),
       });
       const data = await r.json();
-      if (data.success) { loadDetail(); }
-      else showMsg("edit-msg", data.message || "更新失敗", "error");
-    } catch (e) { showMsg("edit-msg", "網路錯誤", "error"); }
-  });
-
-  // Add item
-  const addBtn = document.getElementById("btn-add-item");
-  if (addBtn) {
-    addBtn.addEventListener("click", async () => {
-      const item_id = document.getElementById("add-item-select").value;
-      if (!item_id) return;
-      try {
-        const r = await fetch("api/add_order_item.php", {
-          method: "POST", credentials: "same-origin",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ order_id, item_id }),
-        });
-        const data = await r.json();
-        if (data.success) loadDetail();
-        else showMsg("items-msg", data.message || "新增失敗", "error");
-      } catch (e) { showMsg("items-msg", "網路錯誤", "error"); }
-    });
-  }
-
-  // Remove item
-  document.getElementById("items-tbody").addEventListener("click", async e => {
-    const btn = e.target.closest(".btn-danger[data-item]");
-    if (!btn) return;
-    if (!confirm(`移除 ${btn.dataset.item}？`)) return;
-    try {
-      const r = await fetch("api/delete_order_item.php", {
-        method: "POST", credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order_id, item_id: btn.dataset.item }),
-      });
-      const data = await r.json();
-      if (data.success) loadDetail();
-      else showMsg("items-msg", data.message || "移除失敗", "error");
-    } catch (e) { showMsg("items-msg", "網路錯誤", "error"); }
+      if (data.success) {
+        loadDetail();
+      } else {
+        showMsg("edit-msg", data.message || "更新失敗", "error");
+        lockEditForm(false);
+      }
+    } catch (e) {
+      showMsg("edit-msg", "網路錯誤", "error");
+      lockEditForm(false);
+    }
   });
 }
 
@@ -172,7 +145,7 @@ async function loadDetail() {
     const itemsData = await itemsRes.json();
     if (itemsData.success) allItems = itemsData.items;
     if (orderData.success) renderDetail(orderData.order);
-    else document.getElementById("detail-content").innerHTML = `<div style="color:var(--red);padding:20px;">${orderData.message}</div>`;
+    else { localStorage.removeItem("lensrent_user"); window.location.href = `login.html?redirect=order_detail.html?id=${order_id}`; }
   } catch (e) {
     document.getElementById("detail-content").innerHTML = '<div style="color:var(--red);padding:20px;">載入失敗，請重新整理</div>';
   }

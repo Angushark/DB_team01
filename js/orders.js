@@ -49,14 +49,13 @@ async function loadOrders() {
     const r = await fetch("api/orders.php", { credentials: "same-origin" });
     const data = await r.json();
     if (data.success) renderOrders(data.orders);
-    else document.getElementById("orders-content").innerHTML = `<div style="color:var(--red);padding:20px;">${data.message}</div>`;
+    else { localStorage.removeItem("lensrent_user"); window.location.href = "login.html?redirect=orders.html"; }
   } catch (e) {
     document.getElementById("orders-content").innerHTML = `<div style="color:var(--red);padding:20px;">載入失敗，請重新整理</div>`;
   }
 }
 
-async function deleteOrder(order_id) {
-  if (!confirm(`確定刪除訂單 #${order_id}？`)) return;
+async function deleteOrder(order_id, btn) {
   try {
     const r = await fetch("api/delete_order.php", {
       method: "POST", credentials: "same-origin",
@@ -64,13 +63,23 @@ async function deleteOrder(order_id) {
       body: JSON.stringify({ order_id }),
     });
     const data = await r.json();
-    if (data.success) loadOrders();
-  } catch (e) {}
+    if (data.success) {
+      loadOrders();
+    } else {
+      if (btn) { btn.disabled = false; btn.textContent = "刪除"; }
+    }
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = "刪除"; }
+  }
 }
 
 document.addEventListener("click", e => {
   const btn = e.target.closest(".btn-action--delete[data-id]");
-  if (btn) deleteOrder(btn.dataset.id);
+  if (!btn || btn.disabled) return;
+  if (!confirm(`確定刪除訂單 #${btn.dataset.id}？`)) return;
+  btn.disabled = true;
+  btn.textContent = "刪除中⋯";
+  deleteOrder(btn.dataset.id, btn);
 });
 
 loadOrders();
