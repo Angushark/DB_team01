@@ -6,8 +6,84 @@
   <title>個人中心 — LensRent</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
+  <style>
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 24px;
+      align-items: start;
+      margin-top: 28px;
+      margin-bottom: 60px;
+    }
+    @media (max-width: 680px) {
+      .profile-layout { grid-template-columns: 1fr; }
+    }
+    .sidebar-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      position: sticky;
+      top: 80px;
+    }
+    .sidebar-user {
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-avatar {
+      width: 40px; height: 40px; flex-shrink: 0;
+      background: var(--amber-light);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--amber);
+    }
+    .sidebar-username { font-weight: 700; font-size: 14px; color: var(--t1); }
+    .sidebar-mid     { font-size: 11px; color: var(--t3); margin-top: 2px; }
+    .sidebar-tabs    { display: flex; flex-direction: column; padding: 8px 0; }
+    .sidebar-tab {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 20px;
+      font-size: 14px; font-weight: 500; color: var(--t2);
+      background: none; border: none; cursor: pointer;
+      text-align: left;
+      border-left: 3px solid transparent;
+      transition: background .15s, color .15s;
+    }
+    .sidebar-tab:hover { background: var(--bg); color: var(--t1); }
+    .sidebar-tab.active {
+      color: var(--amber); border-left-color: var(--amber);
+      background: var(--amber-light); font-weight: 600;
+    }
+    .sidebar-tab svg { flex-shrink: 0; }
+    .sidebar-logout {
+      margin: 4px 12px 14px;
+      width: calc(100% - 24px);
+      padding: 8px 12px;
+      background: #fef2f2; color: var(--red, #dc2626);
+      border: 1px solid #fecaca; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .sidebar-logout:hover { background: var(--red, #dc2626); color: #fff; }
+
+    /* order cards (same as orders.html) */
+    .order-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 20px; margin-bottom:14px; }
+    .order-card__header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .order-card__id { font-size:15px; font-weight:700; color:var(--t1); }
+    .order-card__dates { font-size:13px; color:var(--t2); margin-bottom:6px; }
+    .order-card__items { font-size:12px; color:var(--t3); margin-bottom:8px; }
+    .order-card__total { font-size:16px; font-weight:700; color:var(--amber); }
+    .order-card__actions { display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+    .btn-action { padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:none; text-decoration:none; display:inline-flex; align-items:center; }
+    .btn-action--view { background:var(--amber-light,#fffbeb); color:var(--amber); }
+    .btn-action--delete { background:#fef2f2; color:var(--red,#dc2626); }
+    .btn-action--view:hover { background:var(--amber); color:#fff; }
+    .btn-action--delete:hover { background:var(--red,#dc2626); color:#fff; }
+  </style>
 </head>
-<body class="auth-page profile-page">
+<body>
 
   <!-- Header -->
   <header style="background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px; position:sticky; top:0; z-index:50; backdrop-filter:blur(16px);">
@@ -16,138 +92,246 @@
         <span class="logo__icon">📷</span>
         <div><div class="logo__text">LensRent</div><div class="logo__sub">攝影器材租賃</div></div>
       </a>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <a href="orders.html" class="btn-login" style="text-decoration:none;">訂單管理</a>
-        <a href="index.html" class="btn-login" style="text-decoration:none;">← 回首頁</a>
-        <button class="btn-logout" id="btn-logout">登出</button>
-      </div>
+      <div id="auth-buttons"></div>
     </div>
   </header>
 
-  <main style="display:block; padding:32px 16px;">
-    <div class="profile-container" id="profile-content">
-      <div style="text-align:center; padding:60px 20px; color:var(--t3);">
-        <div style="font-size:32px; margin-bottom:8px;">⏳</div>
-        <p>載入會員資料中⋯</p>
+  <main class="container">
+    <div class="profile-layout">
+
+      <!-- ── Sidebar ── -->
+      <aside>
+        <div class="sidebar-panel">
+          <div class="sidebar-user">
+            <div class="sidebar-avatar">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <div class="sidebar-username" id="sidebar-username">—</div>
+              <div class="sidebar-mid" id="sidebar-mid"></div>
+            </div>
+          </div>
+
+          <nav class="sidebar-tabs">
+            <button class="sidebar-tab active" data-tab="account">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              我的帳戶
+            </button>
+            <button class="sidebar-tab" data-tab="orders">
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+              我的訂單
+            </button>
+          </nav>
+
+          <button class="sidebar-logout" id="btn-logout">登出</button>
+        </div>
+      </aside>
+
+      <!-- ── Content ── -->
+      <div>
+        <!-- 我的帳戶 -->
+        <div id="tab-account">
+          <div id="profile-content">
+            <div style="text-align:center; padding:60px 20px; color:var(--t3);">
+              <div style="font-size:32px; margin-bottom:8px;">⏳</div>
+              <p>載入會員資料中⋯</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 我的訂單 -->
+        <div id="tab-orders" style="display:none;">
+          <div id="orders-content">
+            <div style="text-align:center;padding:60px;color:var(--t3);">⏳ 載入中⋯</div>
+          </div>
+        </div>
       </div>
+
     </div>
   </main>
 
   <script>
-    const ORDER_STATE_MAP = {
-      unpaid:    { label: "未付款", cls: "unpaid" },
-      confirmed: { label: "訂單成立", cls: "confirmed" },
-      completed: { label: "訂單完成", cls: "completed" },
-      cancelled: { label: "不成立", cls: "cancelled" },
-    };
+  const STATE_MAP = {
+    unpaid:    { label: "未付款",   cls: "unpaid" },
+    confirmed: { label: "訂單成立", cls: "confirmed" },
+    completed: { label: "訂單完成", cls: "completed" },
+    cancelled: { label: "不成立",   cls: "cancelled" },
+  };
+  const fmtMoney = n => `NT$ ${Number(n).toLocaleString("zh-TW")}`;
 
-    function renderProfile(member, orders) {
-      const r = member.roles || {};
-      const roleBadges = [
-        r.isRenter  ? '<span class="role-badge role-badge--renter">租借者 Renter</span>' : '',
-        r.isProvider? '<span class="role-badge role-badge--provider">出租方 Provider</span>' : '',
-        r.isAdmin   ? '<span class="role-badge role-badge--admin">管理員 Admin</span>' : '',
-      ].filter(Boolean).join('');
-
-      let ordersHtml = '';
-      if (orders.length === 0) {
-        ordersHtml = `<div class="empty-orders"><div class="empty-orders__icon" style="font-size:18px; color:var(--t3);">尚無訂單</div><p>目前沒有租借訂單</p><p style="margin-top:8px;"><a href="index.html" style="color:var(--amber); font-weight:600;">前往瀏覽器材 →</a></p></div>`;
-      } else {
-        ordersHtml = orders.map(o => {
-          const st = ORDER_STATE_MAP[o.order_state] || { label: o.order_state, cls: "unpaid" };
-          const itemNames = (o.items || []).map(i => i.name).join("、") || "—";
-          return `<div class="order-card">
-            <div class="order-card__header">
-              <span class="order-card__id">訂單 #${o.order_id}</span>
-              <span class="order-state-badge order-state--${st.cls}">${st.label}</span>
-            </div>
-            <div class="order-card__dates">租借期間：${o.rent_date} → ${o.return_date}</div>
-            <div class="order-card__items">品項：${itemNames}</div>
-            <div class="order-card__total">${o.total_rental != null ? 'NT$ ' + Number(o.total_rental).toLocaleString('zh-TW') : '—'}</div>
-          </div>`;
-        }).join('');
-      }
-
-      document.getElementById("profile-content").innerHTML = `
-        <!-- Profile Card -->
-        <div class="profile-card">
-          <div class="profile-card__header">
-            <div class="profile-card__avatar">
-              <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </div>
-            <div>
-              <h1 class="profile-card__name">${member.username}</h1>
-              <p class="profile-card__id">Member ID: ${member.member_id}</p>
-              <div class="role-badges" style="margin-top:6px;">${roleBadges}</div>
-            </div>
-          </div>
-          <div class="profile-info-grid">
-            <div class="profile-info-item">
-              <div class="profile-info-item__label">電子信箱</div>
-              <div class="profile-info-item__value">${member.email}</div>
-            </div>
-            <div class="profile-info-item">
-              <div class="profile-info-item__label">聯絡電話</div>
-              <div class="profile-info-item__value">${member.phone_number || '未填寫'}</div>
-            </div>
-            <div class="profile-info-item">
-              <div class="profile-info-item__label">註冊日期</div>
-              <div class="profile-info-item__value">${member.reg_date}</div>
-            </div>
-            <div class="profile-info-item">
-              <div class="profile-info-item__label">訂單數量</div>
-              <div class="profile-info-item__value">${orders.length} 筆</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Orders -->
-        <div>
-          <h2 class="orders-section__title">我的租借訂單</h2>
-          ${ordersHtml}
-        </div>
-      `;
-    }
-
-    function renderError(text) {
-      document.getElementById("profile-content").innerHTML = `
-        <div style="text-align:center; padding:60px 20px; color:var(--t3);">
-          <div style="font-size:40px; margin-bottom:12px;">🔒</div>
-          <p style="font-size:16px; font-weight:600; margin-bottom:8px;">${text}</p>
-          <a href="login.html" style="color:var(--amber); font-weight:600;">前往登入 →</a>
-        </div>`;
-    }
-
-    // Check login state
-    const localUser = JSON.parse(localStorage.getItem("lensrent_user") || "null");
-    if (!localUser) {
-      renderError("請先登入以查看個人資料");
+  // ── Auth header ───────────────────────────────────────────────────────────
+  function renderAuthButtons() {
+    const user = JSON.parse(localStorage.getItem("lensrent_user") || "null");
+    const el = document.getElementById("auth-buttons");
+    if (user) {
+      el.innerHTML = `<span class="btn-user-menu">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        ${user.username}</span>`;
     } else {
-      // Fetch live data from API
-      fetch("api/profile.php", { credentials: "same-origin" })
-        .then(r => r.json())
-        .then(data => {
-          if (data.success) {
-            // Update localStorage with fresh data
-            localStorage.setItem("lensrent_user", JSON.stringify(data.member));
-            renderProfile(data.member, data.orders);
-          } else {
-            // API session expired, fall back to localStorage data
-            renderProfile(localUser, []);
-          }
-        })
-        .catch(() => {
-          // Backend unreachable, show localStorage data
-          renderProfile(localUser, []);
-        });
+      el.innerHTML = `<a href="login.html" class="btn-login">登入</a><a href="register.html" class="btn-register">註冊</a>`;
     }
+  }
 
-    // Logout
-    document.getElementById("btn-logout").addEventListener("click", () => {
-      localStorage.removeItem("lensrent_user");
-      fetch("api/logout.php", { credentials: "same-origin" }).catch(() => {});
-      window.location.href = "index.html";
+  // ── Profile ───────────────────────────────────────────────────────────────
+  function renderProfile(member) {
+    const user = document.getElementById("sidebar-username");
+    const mid  = document.getElementById("sidebar-mid");
+    if (user) user.textContent = member.username;
+    if (mid)  mid.textContent  = "ID: " + member.member_id;
+
+    const r = member.roles || {};
+    const roleBadges = [
+      r.isRenter  ? '<span class="role-badge role-badge--renter">租借者 Renter</span>' : '',
+      r.isProvider? '<span class="role-badge role-badge--provider">出租方 Provider</span>' : '',
+      r.isAdmin   ? '<span class="role-badge role-badge--admin">管理員 Admin</span>' : '',
+    ].filter(Boolean).join('');
+
+    document.getElementById("profile-content").innerHTML = `
+      <div class="profile-card">
+        <div class="profile-card__header">
+          <div class="profile-card__avatar">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <h1 class="profile-card__name">${member.username}</h1>
+            <p class="profile-card__id">Member ID: ${member.member_id}</p>
+            <div class="role-badges" style="margin-top:6px;">${roleBadges}</div>
+          </div>
+        </div>
+        <div class="profile-info-grid">
+          <div class="profile-info-item">
+            <div class="profile-info-item__label">電子信箱</div>
+            <div class="profile-info-item__value">${member.email}</div>
+          </div>
+          <div class="profile-info-item">
+            <div class="profile-info-item__label">聯絡電話</div>
+            <div class="profile-info-item__value">${member.phone_number || '未填寫'}</div>
+          </div>
+          <div class="profile-info-item">
+            <div class="profile-info-item__label">註冊日期</div>
+            <div class="profile-info-item__value">${member.reg_date}</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderError(text) {
+    document.getElementById("profile-content").innerHTML = `
+      <div style="text-align:center; padding:60px 20px; color:var(--t3);">
+        <div style="font-size:40px; margin-bottom:12px;">🔒</div>
+        <p style="font-size:16px; font-weight:600; margin-bottom:8px;">${text}</p>
+        <a href="login.html" style="color:var(--amber); font-weight:600;">前往登入 →</a>
+      </div>`;
+  }
+
+  // ── Orders ────────────────────────────────────────────────────────────────
+  let ordersLoaded = false;
+
+  function renderOrders(orders) {
+    const el = document.getElementById("orders-content");
+    if (!orders.length) {
+      el.innerHTML = `<div style="text-align:center;padding:60px;color:var(--t3);">
+        <div style="font-size:40px;margin-bottom:10px;">📋</div>
+        <p style="font-weight:600;">目前沒有訂單</p>
+        <a href="index.html" style="color:var(--amber);font-weight:700;font-size:13px;">去瀏覽器材 →</a>
+      </div>`;
+      return;
+    }
+    el.innerHTML = orders.map(o => {
+      const st = STATE_MAP[o.order_state] || { label: o.order_state, cls: "unpaid" };
+      return `<div class="order-card">
+        <div class="order-card__header">
+          <span class="order-card__id">訂單 #${o.order_id}</span>
+          <span class="order-state-badge order-state--${st.cls}">${st.label}</span>
+        </div>
+        <div class="order-card__dates">租借期間：${o.rent_date} → ${o.return_date}</div>
+        <div class="order-card__total">${fmtMoney(o.total_rental)}</div>
+        <div class="order-card__actions">
+          <a href="order_detail.html?id=${o.order_id}" class="btn-action btn-action--view">查看 / 編輯</a>
+          <button class="btn-action btn-action--delete" data-id="${o.order_id}">刪除</button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  async function loadOrders() {
+    if (ordersLoaded) return;
+    ordersLoaded = true;
+    try {
+      const r = await fetch("api/orders.php", { credentials: "same-origin" });
+      const data = await r.json();
+      if (data.success) renderOrders(data.orders);
+      else {
+        localStorage.removeItem("lensrent_user");
+        window.location.href = "login.html?redirect=profile.html";
+      }
+    } catch (e) {
+      document.getElementById("orders-content").innerHTML = `<div style="color:var(--red);padding:20px;">載入失敗，請重新整理</div>`;
+    }
+  }
+
+  async function deleteOrder(order_id, btn) {
+    try {
+      const r = await fetch("api/delete_order.php", {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order_id }),
+      });
+      const data = await r.json();
+      if (data.success) { ordersLoaded = false; loadOrders(); }
+      else { if (btn) { btn.disabled = false; btn.textContent = "刪除"; } }
+    } catch (e) {
+      if (btn) { btn.disabled = false; btn.textContent = "刪除"; }
+    }
+  }
+
+  // ── Tab switching ─────────────────────────────────────────────────────────
+  document.querySelectorAll(".sidebar-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".sidebar-tab").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const tab = btn.dataset.tab;
+      document.getElementById("tab-account").style.display = tab === "account" ? "" : "none";
+      document.getElementById("tab-orders").style.display  = tab === "orders"  ? "" : "none";
+      if (tab === "orders") loadOrders();
     });
+  });
+
+  // ── Order delete event ────────────────────────────────────────────────────
+  document.addEventListener("click", e => {
+    const btn = e.target.closest(".btn-action--delete[data-id]");
+    if (!btn || btn.disabled) return;
+    if (!confirm(`確定刪除訂單 #${btn.dataset.id}？`)) return;
+    btn.disabled = true;
+    btn.textContent = "刪除中⋯";
+    deleteOrder(btn.dataset.id, btn);
+  });
+
+  // ── Logout ────────────────────────────────────────────────────────────────
+  document.getElementById("btn-logout").addEventListener("click", () => {
+    localStorage.removeItem("lensrent_user");
+    fetch("api/logout.php", { credentials: "same-origin" }).catch(() => {});
+    window.location.href = "index.html";
+  });
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  renderAuthButtons();
+  const localUser = JSON.parse(localStorage.getItem("lensrent_user") || "null");
+  if (!localUser) {
+    renderError("請先登入以查看個人資料");
+  } else {
+    fetch("api/profile.php", { credentials: "same-origin" })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          localStorage.setItem("lensrent_user", JSON.stringify(data.member));
+          renderProfile(data.member);
+        } else {
+          renderProfile(localUser);
+        }
+      })
+      .catch(() => renderProfile(localUser));
+  }
   </script>
 </body>
 </html>

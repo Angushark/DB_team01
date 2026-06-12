@@ -88,9 +88,18 @@
           <input type="text" id="return-date" class="flatpickr-input" placeholder="選擇日期" readonly>
         </div>
         <div class="subtotal-box" id="subtotal-box">
-          <div style="font-size:11px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">每日小計</div>
-          <div id="subtotal-text" style="font-size:22px;font-weight:700;color:var(--amber);">NT$ 0</div>
-          <div style="font-size:11px;color:var(--t3);margin-top:2px;">總金額依租借天數計算</div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--t2);margin-bottom:6px;">
+            <span>每日租金</span>
+            <span id="subtotal-text" style="font-weight:600;color:var(--amber);">NT$ 0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--t2);margin-bottom:8px;">
+            <span>租借天數</span>
+            <span id="days-text" style="font-weight:600;">—</span>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;color:var(--t2);font-weight:600;">總金額</span>
+            <span id="total-text" style="font-size:20px;font-weight:700;color:var(--amber);">NT$ 0</span>
+          </div>
         </div>
         <button id="btn-create" class="btn-submit">確認建立訂單</button>
       </div>

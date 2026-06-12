@@ -2,7 +2,7 @@
 const item_id = new URLSearchParams(location.search).get("id");
 const fmt = n => `NT$ ${Number(n).toLocaleString("zh-TW")}`;
 
-const RENT_LABEL = { available: "空置中", rented: "出租中", unavailable: "不可用" };
+const RENT_LABEL = { available: "可租借", rented: "租借中", unavailable: "不可租借" };
 
 function renderSpecs(specsRaw) {
   let obj;
@@ -80,11 +80,10 @@ function renderItem(item, inCart, cartCount) {
   let btnHtml;
   if (!available) {
     btnHtml = `<button class="btn-primary" disabled style="opacity:.5;cursor:not-allowed;">
-      ${item.rent_state === "rented" ? "目前已出租" : "暫不可租借"}
+      ${item.rent_state === "rented" ? "租借中" : "不可租借"}
     </button>`;
   } else if (inCart) {
-    btnHtml = `<button class="btn-primary" disabled style="opacity:.7;cursor:default;">✓ 已加入購物車</button>
-      <a href="cart.html" class="btn-secondary" style="text-align:center;">前往購物車 →</a>`;
+    btnHtml = `<button class="btn-primary" disabled style="opacity:.7;cursor:default;">✓ 已加入購物車</button>`;
   } else {
     btnHtml = `<button id="btn-add-cart" class="btn-primary">＋ 加入購物車</button>`;
   }
@@ -126,7 +125,6 @@ function renderItem(item, inCart, cartCount) {
         <div class="item-actions">
           <div id="cart-msg" class="msg-box" style="display:none;"></div>
           ${btnHtml}
-          <a href="index.html" class="btn-secondary" style="text-align:center;">← 繼續瀏覽</a>
         </div>
 
         <div style="font-size:12px;color:var(--t3);line-height:1.6;padding-top:4px;">
@@ -143,6 +141,8 @@ function renderItem(item, inCart, cartCount) {
     </div>` : ""}
 
     ${item.specs ? renderSpecs(item.specs) : ""}
+
+    <div id="related-section"></div>
   `;
 
   const addBtn = document.getElementById("btn-add-cart");
@@ -171,9 +171,7 @@ function renderItem(item, inCart, cartCount) {
             const msgEl = document.getElementById("cart-msg");
             const msgHtml = msgEl ? msgEl.outerHTML : "";
             actions.innerHTML = `${msgHtml}
-              <button class="btn-primary" disabled style="opacity:.7;cursor:default;">✓ 已加入購物車</button>
-              <a href="cart.html" class="btn-secondary" style="text-align:center;">前往購物車 →</a>
-              <a href="index.html" class="btn-secondary" style="text-align:center;">← 繼續瀏覽</a>`;
+              <button class="btn-primary" disabled style="opacity:.7;cursor:default;">✓ 已加入購物車</button>`;
           }
         } else if (data.message === "請先登入") {
           localStorage.removeItem("lensrent_user");
@@ -192,6 +190,39 @@ function renderItem(item, inCart, cartCount) {
   }
 }
 
+function renderRelated(related, oppositeType) {
+  const el = document.getElementById("related-section");
+  if (!el || related.length === 0) return;
+  const label = oppositeType === "Accessory" ? "配套配件" : "適用機身";
+  const stateMap = { available: "可租借", rented: "租借中", unavailable: "不可租借" };
+  const cards = related.map(r => {
+    const st = stateMap[r.rent_state] || r.rent_state;
+    const stCls = r.rent_state === "available" ? "available" : "rented";
+    const imgTag = r.url
+      ? `<img src="${r.url}" alt="${r.name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><span class="card-img__emoji" style="display:none">${r.type === "Equipment" ? "📷" : "🎒"}</span>`
+      : `<span class="card-img__emoji">${r.type === "Equipment" ? "📷" : "🎒"}</span>`;
+    return `<a href="item.html?id=${r.item_id}" class="product-card compact" style="text-decoration:none;color:inherit;display:block;">
+      <div class="card-img">${imgTag}
+        <span class="badge-state badge-state--${stCls}"><span class="badge-state__dot"></span>${st}</span>
+      </div>
+      <div class="card-info">
+        <div class="card-info__tags">
+          <span class="badge-type badge-type--${r.type === "Equipment" ? "equipment" : "accessory"}">${r.type === "Equipment" ? "器材" : "配件"}</span>
+          <span class="card-info__brand">${r.brand}</span>
+        </div>
+        <h3 class="card-info__name">${r.name}</h3>
+        <div class="card-info__bottom">
+          <span class="card-info__price">NT$ ${Number(r.rental).toLocaleString("zh-TW")}<span class="card-info__price-unit">/日</span></span>
+        </div>
+      </div>
+    </a>`;
+  }).join("");
+  el.innerHTML = `<div class="panel" style="margin-top:16px;">
+    <div class="panel__title">${label}</div>
+    <div class="product-grid" style="margin-top:12px;">${cards}</div>
+  </div>`;
+}
+
 function showError(text) {
   document.getElementById("item-content").innerHTML = `
     <div style="text-align:center;padding:80px 20px;color:var(--t3);">
@@ -204,16 +235,21 @@ function showError(text) {
 async function loadItem() {
   if (!item_id) { showError("缺少器材編號"); return; }
   try {
-    const [itemRes, cartRes] = await Promise.all([
+    const [itemRes, cartRes, relatedRes] = await Promise.all([
       fetch(`api/item_detail.php?item_id=${item_id}`),
       fetch("api/cart.php", { credentials: "same-origin" }),
+      fetch(`api/item_related.php?item_id=${item_id}`),
     ]);
     const itemData = await itemRes.json();
     const cartData = await cartRes.json();
+    const relatedData = await relatedRes.json();
     if (!itemData.success) { showError(itemData.message || "找不到器材"); return; }
     const inCart = cartData.success && cartData.cart.some(c => String(c.item_id) === String(item_id));
     const cartCount = cartData.success ? (cartData.count || 0) : 0;
     renderItem(itemData.item, inCart, cartCount);
+    if (relatedData.success && relatedData.related.length > 0) {
+      renderRelated(relatedData.related, relatedData.opposite_type);
+    }
   } catch (e) {
     showError("載入失敗，請重新整理");
   }

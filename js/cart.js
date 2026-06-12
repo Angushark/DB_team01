@@ -1,6 +1,24 @@
 // ── cart.js ──────────────────────────────────────────────────────────────────
 const fmt = n => `NT$ ${Number(n).toLocaleString("zh-TW")}`;
 
+function updateTotalDisplay() {
+  const rentVal   = document.getElementById("rent-date")?.value;
+  const returnVal = document.getElementById("return-date")?.value;
+  const daysEl    = document.getElementById("days-text");
+  const totalEl   = document.getElementById("total-text");
+  const subtotal  = window._cartSubtotal || 0;
+
+  if (rentVal && returnVal) {
+    const diff = Math.round((new Date(returnVal) - new Date(rentVal)) / 86400000);
+    const days = Math.max(1, diff);
+    if (daysEl) daysEl.textContent = `${days} 天`;
+    if (totalEl) totalEl.textContent = fmt(subtotal * days);
+  } else {
+    if (daysEl) daysEl.textContent = "—";
+    if (totalEl) totalEl.textContent = fmt(subtotal);
+  }
+}
+
 function showMsg(id, text, type) {
   const el = document.getElementById(id);
   el.textContent = text;
@@ -20,11 +38,15 @@ function renderCart(cart) {
     </div>`;
     btnClear.style.display = "none";
     subtotalText.textContent = "NT$ 0";
+    window._cartSubtotal = 0;
+    updateTotalDisplay();
     return;
   }
 
   const subtotal = cart.reduce((s, c) => s + parseFloat(c.rental), 0);
   subtotalText.textContent = fmt(subtotal);
+  window._cartSubtotal = subtotal;
+  updateTotalDisplay();
   btnClear.style.display = "inline-block";
 
   panel.innerHTML = `<table class="cart-table">
@@ -107,12 +129,13 @@ function initDatePickers(blocked = []) {
     dateFormat: "Y-m-d", altInput: true, altFormat: "Y年n月j日（D）",
     defaultDate: "today", minDate: "today",
     disable: blocked,
-    onChange: (dates) => { if (dates[0]) returnPicker.set("minDate", dates[0]); },
+    onChange: (dates) => { if (dates[0]) { returnPicker.set("minDate", dates[0]); updateTotalDisplay(); } },
   });
   returnPicker = flatpickr("#return-date", {
     dateFormat: "Y-m-d", altInput: true, altFormat: "Y年n月j日（D）",
     defaultDate: new Date(Date.now() + 3 * 864e5), minDate: "today",
     disable: blocked,
+    onChange: () => updateTotalDisplay(),
   });
 }
 

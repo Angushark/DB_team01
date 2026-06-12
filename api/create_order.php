@@ -31,7 +31,7 @@ $days        = max(1, (int)(new DateTime($return_date))->diff(new DateTime($rent
 $res      = $conn->query("SELECT COALESCE(MAX(CAST(order_id AS UNSIGNED)), 0) + 1 AS next_id FROM `Order`");
 $order_id = $conn->real_escape_string((string)$res->fetch_assoc()['next_id']);
 
-if (!$conn->query("INSERT INTO `Order` (order_id, renter_id, rent_date, return_date, total_rental, order_state) VALUES ('$order_id','$renter_id','$rd','$rrd',0,'unpaid')")) {
+if (!$conn->query("INSERT INTO `Order` (order_id, renter_id, rent_date, return_date, total_rental, order_state, create_date) VALUES ('$order_id','$renter_id','$rd','$rrd',0,'unpaid',NOW())")) {
     echo json_encode(['success' => false, 'message' => '建立訂單失敗：' . $conn->error]); exit;
 }
 

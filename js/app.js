@@ -40,7 +40,7 @@ const PROMOS = [
 // ── Data transform ──────────────────────────────────────────────────────────
 function transformItem(item) {
   const isEquip = item.type === "Equipment";
-  const stateMap = { available: "空置中", rented: "出租中", unavailable: "不可用" };
+  const stateMap = { available: "可租借", rented: "租借中", unavailable: "不可租借" };
   return {
     id: item.item_id, item_id: item.item_id,
     name: item.name, brand: item.brand || "", model: item.model || "",
@@ -193,7 +193,6 @@ function renderHomeView() {
   const items = state.items;
   const eq = items.filter(p => p.item_type === "equipment");
   const ac = items.filter(p => p.item_type === "accessory");
-  $("#hot-track").innerHTML = items.slice(0, 6).map(p => renderProductCard(p, true)).join("");
   $("#promo-grid").innerHTML = PROMOS.map((promo, i) => {
     const bg = PROMO_OVERRIDES[i].bg;
     return `<div class="promo-tile" style="background:${bg}"><div class="promo-tile__bg-icon">${promo.icon}</div><div class="promo-tile__label" style="color:rgba(255,255,255,0.7)">限定方案</div><h3 class="promo-tile__title">${promo.title}</h3><p class="promo-tile__sub">${promo.sub}</p></div>`;
@@ -212,8 +211,6 @@ function initEvents() {
   $("#cat-nav").addEventListener("click", e => { const b = e.target.closest(".cat-nav-btn"); if (b) { state.activeCat = b.dataset.cat; render(); } });
   $("#hero-dots").addEventListener("click", e => { const d = e.target.closest(".hero__dot"); if (d) { state.bannerIdx = parseInt(d.dataset.banner); renderBanner(); } });
   $("#cat-tiles-grid").addEventListener("click", e => { const t = e.target.closest(".cat-tile"); if (t) { state.activeCat = t.dataset.cat; render(); } });
-  $("#scroll-left").addEventListener("click", () => { $("#hot-track").scrollBy({ left: -260, behavior: "smooth" }); });
-  $("#scroll-right").addEventListener("click", () => { $("#hot-track").scrollBy({ left: 260, behavior: "smooth" }); });
   document.body.addEventListener("click", e => {
     if (e.target.id === "clear-filter") { state.activeCat = "all"; render(); }
   });

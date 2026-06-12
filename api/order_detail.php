@@ -7,6 +7,10 @@ if (empty($_SESSION['member_id'])) {
 }
 
 require_once '../db_config.php';
+
+// 自動取消超過20分鐘未付款的訂單
+$conn->query("UPDATE `Order` SET order_state='cancelled' WHERE order_state='unpaid' AND TIMESTAMPDIFF(MINUTE, create_date, NOW()) >= 20");
+
 $oid = $conn->real_escape_string($_GET['order_id'] ?? '');
 $mid = $conn->real_escape_string($_SESSION['member_id']);
 

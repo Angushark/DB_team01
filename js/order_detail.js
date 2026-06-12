@@ -1,5 +1,19 @@
 // ── order_detail.js ───────────────────────────────────────────────────────────
 const fmt = n => `NT$ ${Number(n).toLocaleString("zh-TW")}`;
+
+function renderAuthButtons() {
+  const user = JSON.parse(localStorage.getItem("lensrent_user") || "null");
+  const el = document.getElementById("auth-buttons");
+  if (!el) return;
+  if (user) {
+    el.innerHTML = `<a href="profile.html" class="btn-user-menu">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      ${user.username}</a>`;
+  } else {
+    el.innerHTML = `<a href="login.html" class="btn-login">登入</a><a href="register.html" class="btn-register">註冊</a>`;
+  }
+}
+renderAuthButtons();
 const STATE_MAP = {
   unpaid:    "未付款", confirmed: "訂單成立",
   completed: "訂單完成", cancelled: "不成立",
