@@ -66,10 +66,14 @@ input::placeholder { color: var(--t3); }
 }
 .header-row { display: flex; align-items: center; gap: 20px; height: 60px; }
 
-.logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; cursor: pointer; }
-.logo__icon { font-size: 26px; }
+.logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; cursor: pointer; height: 38px; width: 133px; }
+.logo__img { width: 38px; height: 38px; object-fit: contain; flex-shrink: 0; }
+.logo__names { display: flex; flex-direction: column; justify-content: center; gap: 0px; }
+.logo__zh { font-family: var(--font-sans); font-weight: 700; font-size: 15px; color: var(--t1); letter-spacing: 0.5px; line-height: 1.2; }
+.logo__en { font-family: var(--font-mono); font-weight: 600; font-size: 10px; color: var(--t3); letter-spacing: 1px; line-height: 1.2; }
+/* keep old selectors in case any page still uses them */
 .logo__text { font-family: var(--font-mono); font-weight: 700; font-size: 18px; color: var(--amber); letter-spacing: -0.5px; line-height: 1; }
-.logo__sub { font-size: 9px; color: var(--t3); letter-spacing: 1px; }
+.logo__sub  { font-size: 9px; color: var(--t3); letter-spacing: 1px; }
 
 .search-wrap { flex: 1; max-width: 520px; position: relative; }
 .search-wrap__icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--t3); display: inline-flex; }
