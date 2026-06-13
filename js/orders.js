@@ -11,7 +11,7 @@ function renderOrders(orders) {
   const el = document.getElementById("orders-content");
   if (!orders.length) {
     el.innerHTML = `<div style="text-align:center;padding:60px;color:var(--t3);">
-      <div style="font-size:40px;margin-bottom:10px;">📋</div>
+      
       <p style="font-weight:600;">目前沒有訂單</p>
       <a href="index.html" style="color:var(--amber);font-weight:700;font-size:13px;">去瀏覽器材 →</a>
     </div>`;

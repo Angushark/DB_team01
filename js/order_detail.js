@@ -26,6 +26,9 @@ let editReturnPicker = null;
 flatpickr.localize(flatpickr.l10ns.zh_tw);
 
 function renderDetail(order) {
+  const user  = JSON.parse(localStorage.getItem("lensrent_user") || "null");
+  const isAdmin = user?.roles?.isAdmin === true;
+
   const st = STATE_MAP[order.order_state] || order.order_state;
   const days = Math.max(1, Math.round((new Date(order.return_date) - new Date(order.rent_date)) / 864e5));
   const itemRows = order.items.length
@@ -38,25 +41,8 @@ function renderDetail(order) {
       </tr>`).join("")
     : `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--t3);">尚無明細</td></tr>`;
 
-  document.getElementById("detail-content").innerHTML = `
-    ${location.search.includes("new=1") ? '<div class="msg-box success" style="display:block;">✓ 訂單已建立成功！</div>' : ""}
-
-    <!-- Order Info -->
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <h1 style="font-size:20px;font-weight:700;margin:0;">訂單 #${order.order_id}</h1>
-      <span class="order-state-badge order-state--${order.order_state}">${st}</span>
-    </div>
-    <div class="panel">
-      <div class="info-grid">
-        <div><div class="info-item__label">租借人</div><div class="info-item__value">${order.renter_name}</div></div>
-        <div><div class="info-item__label">訂單總金額</div><div class="info-item__value" style="color:var(--amber);">${fmt(order.total_rental)}</div></div>
-        <div><div class="info-item__label">租借日期</div><div class="info-item__value">${order.rent_date}</div></div>
-        <div><div class="info-item__label">歸還日期</div><div class="info-item__value">${order.return_date}</div></div>
-        <div><div class="info-item__label">租借天數</div><div class="info-item__value">${days} 天</div></div>
-      </div>
-    </div>
-
-    <!-- Edit Order -->
+  // Edit panel: Admin only
+  const editPanel = isAdmin ? `
     <div class="panel">
       <div class="panel__title">編輯訂單</div>
       <div id="edit-msg" class="msg-box"></div>
@@ -82,7 +68,27 @@ function renderDetail(order) {
         <button id="btn-save" class="btn-primary">儲存變更</button>
         <a href="orders.html" class="btn-secondary">取消</a>
       </div>
+    </div>` : "";
+
+  document.getElementById("detail-content").innerHTML = `
+    ${location.search.includes("new=1") ? '<div class="msg-box success" style="display:block;">✓ 訂單已建立成功！</div>' : ""}
+
+    <!-- Order Info -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <h1 style="font-size:20px;font-weight:700;margin:0;">訂單 #${order.order_id}</h1>
+      <span class="order-state-badge order-state--${order.order_state}">${st}</span>
     </div>
+    <div class="panel">
+      <div class="info-grid">
+        <div><div class="info-item__label">租借人</div><div class="info-item__value">${order.renter_name}</div></div>
+        <div><div class="info-item__label">訂單總金額</div><div class="info-item__value" style="color:var(--amber);">${fmt(order.total_rental)}</div></div>
+        <div><div class="info-item__label">租借日期</div><div class="info-item__value">${order.rent_date}</div></div>
+        <div><div class="info-item__label">歸還日期</div><div class="info-item__value">${order.return_date}</div></div>
+        <div><div class="info-item__label">租借天數</div><div class="info-item__value">${days} 天</div></div>
+      </div>
+    </div>
+
+    ${editPanel}
 
     <!-- Items -->
     <div class="panel">
@@ -94,52 +100,53 @@ function renderDetail(order) {
       </table>
     </div>`;
 
-  // Init flatpickr — store at module level so save handler can lock/unlock them
-  editRentPicker = flatpickr("#edit-rent", {
-    dateFormat: "Y-m-d", altInput: true, altFormat: "Y年n月j日",
-    defaultDate: order.rent_date,
-    onChange: (d) => { if (d[0]) editReturnPicker.set("minDate", d[0]); },
-  });
-  editReturnPicker = flatpickr("#edit-return", {
-    dateFormat: "Y-m-d", altInput: true, altFormat: "Y年n月j日",
-    defaultDate: order.return_date, minDate: order.rent_date,
-  });
+  // Init flatpickr and save handler only for Admin
+  if (isAdmin) {
+    editRentPicker = flatpickr("#edit-rent", {
+      dateFormat: "Y-m-d", altInput: true, altFormat: "Y年n月j日",
+      defaultDate: order.rent_date,
+      onChange: (d) => { if (d[0]) editReturnPicker.set("minDate", d[0]); },
+    });
+    editReturnPicker = flatpickr("#edit-return", {
+      dateFormat: "Y-m-d", altInput: true, altFormat: "Y年n月j日",
+      defaultDate: order.return_date, minDate: order.rent_date,
+    });
 
-  function lockEditForm(lock) {
-    const saveBtn = document.getElementById("btn-save");
-    const stateEl = document.getElementById("edit-state");
-    if (saveBtn) { saveBtn.disabled = lock; if (lock) saveBtn.textContent = "儲存中⋯"; else saveBtn.textContent = "儲存變更"; }
-    if (stateEl) stateEl.disabled = lock;
-    if (editRentPicker)   editRentPicker.set("clickOpens", !lock);
-    if (editReturnPicker) editReturnPicker.set("clickOpens", !lock);
-  }
+    function lockEditForm(lock) {
+      const saveBtn = document.getElementById("btn-save");
+      const stateEl = document.getElementById("edit-state");
+      if (saveBtn) { saveBtn.disabled = lock; saveBtn.textContent = lock ? "儲存中⋯" : "儲存變更"; }
+      if (stateEl) stateEl.disabled = lock;
+      if (editRentPicker)   editRentPicker.set("clickOpens", !lock);
+      if (editReturnPicker) editReturnPicker.set("clickOpens", !lock);
+    }
 
-  // Save button
-  document.getElementById("btn-save").addEventListener("click", async (e) => {
-    const btn = e.currentTarget;
-    if (btn.disabled) return;
-    const rent_date   = document.getElementById("edit-rent").value;
-    const return_date = document.getElementById("edit-return").value;
-    const order_state = document.getElementById("edit-state").value;
-    lockEditForm(true);
-    try {
-      const r = await fetch("api/update_order.php", {
-        method: "POST", credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order_id, rent_date, return_date, order_state }),
-      });
-      const data = await r.json();
-      if (data.success) {
-        loadDetail();
-      } else {
-        showMsg("edit-msg", data.message || "更新失敗", "error");
+    document.getElementById("btn-save").addEventListener("click", async (e) => {
+      const btn = e.currentTarget;
+      if (btn.disabled) return;
+      const rent_date   = document.getElementById("edit-rent").value;
+      const return_date = document.getElementById("edit-return").value;
+      const order_state = document.getElementById("edit-state").value;
+      lockEditForm(true);
+      try {
+        const r = await fetch("api/update_order.php", {
+          method: "POST", credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order_id, rent_date, return_date, order_state }),
+        });
+        const data = await r.json();
+        if (data.success) {
+          loadDetail();
+        } else {
+          showMsg("edit-msg", data.message || "更新失敗", "error");
+          lockEditForm(false);
+        }
+      } catch (e) {
+        showMsg("edit-msg", "網路錯誤", "error");
         lockEditForm(false);
       }
-    } catch (e) {
-      showMsg("edit-msg", "網路錯誤", "error");
-      lockEditForm(false);
-    }
-  });
+    });
+  }
 }
 
 function showMsg(id, text, type) {
