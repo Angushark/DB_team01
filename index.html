@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LensRent — 攝影器材租賃平台</title>
+  <title>10gear 拾光機 — 攝影器材租賃平台</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
 </head>
@@ -27,13 +27,13 @@
       <!-- Row 1: Logo + Search + Actions -->
       <div class="header-row">
         <!-- Logo -->
-        <div class="logo">
-          <span class="logo__icon">📷</span>
-          <div>
-            <div class="logo__text">LensRent</div>
-            <div class="logo__sub">攝影器材租賃</div>
+        <a href="index.html" class="logo" style="text-decoration:none;">
+          <img src="logo.png" alt="10gear" class="logo__img">
+          <div class="logo__names">
+            <span class="logo__zh">拾光機</span>
+            <span class="logo__en">10gear</span>
           </div>
-        </div>
+        </a>
 
         <!-- Search -->
         <div class="search-wrap">
@@ -81,7 +81,7 @@
           <div class="hero__circle hero__circle--1" id="hero-circle-1"></div>
           <div class="hero__circle hero__circle--2" id="hero-circle-2"></div>
           <div class="hero__content">
-            <div class="hero__label" id="hero-label">LensRent 精選</div>
+            <div class="hero__label" id="hero-label">10gear 精選</div>
             <h2 class="hero__title" id="hero-title"></h2>
             <p class="hero__sub" id="hero-sub"></p>
             <button class="hero__cta" id="hero-cta"></button>
@@ -122,7 +122,7 @@
       <section class="section">
         <div class="section-head">
           <div>
-            <h2 class="section-head__title"><span style="color:var(--green)">✨</span> 新品上架</h2>
+            <h2 class="section-head__title">新品上架</h2>
             <p class="section-head__sub">最新加入的器材與配件</p>
           </div>
         </div>
@@ -135,7 +135,7 @@
       <section class="section">
         <div class="section-head">
           <div>
-            <h2 class="section-head__title"><span style="color:var(--amber)">📷</span> 相機 / 鏡頭</h2>
+            <h2 class="section-head__title">相機 / 鏡頭</h2>
             <p class="section-head__sub">微單眼、類單眼、運動相機、電影機、鏡頭</p>
           </div>
         </div>
@@ -148,7 +148,7 @@
       <section class="section">
         <div class="section-head">
           <div>
-            <h2 class="section-head__title"><span style="color:var(--blue)">🛠️</span> 配件周邊</h2>
+            <h2 class="section-head__title">配件周邊</h2>
             <p class="section-head__sub">腳架、電池、記憶卡、燈光、穩定器、相機包</p>
           </div>
         </div>
@@ -166,11 +166,14 @@
       <div class="footer-grid">
         <!-- Col 1: Brand -->
         <div>
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-            <span style="font-size:20px;">📷</span>
-            <span class="mono" style="font-weight:700; font-size:15px; color:var(--amber-text);">LensRent</span>
-          </div>
-          <p class="footer-col__text">專業攝影器材租賃平台，從入門到專業，讓每位創作者都能用最好的器材說故事。</p>
+          <a href="index.html" class="logo" style="text-decoration:none; margin-bottom:12px; display:inline-flex;">
+            <img src="logo.png" alt="10gear" class="logo__img" style="filter:invert(1) brightness(2);">
+            <div class="logo__names">
+              <span class="logo__zh" style="color:#fff;">拾光機</span>
+              <span class="logo__en" style="color:#a3a3a3;">10gear</span>
+            </div>
+          </a>
+          <p class="footer-col__text">租一台拾光機，打包每一個無可取代的瞬間</p>
         </div>
         <!-- Col 2: Service -->
         <div>
@@ -191,18 +194,18 @@
         <!-- Col 4: Contact -->
         <div>
           <h4 class="footer-col__title">聯絡</h4>
-          <p class="footer-col__link">客服信箱: support@lensrent.tw</p>
-          <p class="footer-col__link">LINE: @lensrent</p>
+          <p class="footer-col__link">客服信箱: support@10gear.tw</p>
+          <p class="footer-col__link">LINE: @10gear</p>
           <p class="footer-col__link">營業時間: 10:00–20:00</p>
         </div>
       </div>
       <!-- Bottom bar -->
       <div class="footer-bottom">
-        <p class="footer-bottom__copy">© 2026 LensRent · 攝影器材租賃平台</p>
+        <p class="footer-bottom__copy">© 2026 10gear 拾光機</p>
         <div class="footer-bottom__links">
-          <span>隱私權政策</span>
-          <span>服務條款</span>
-          <span>退租辦法</span>
+          <a href="privacy.html" style="color:inherit;text-decoration:none;">隱私權政策</a>
+          <a href="terms.html" style="color:inherit;text-decoration:none;">服務條款</a>
+          <a href="return-policy.html" style="color:inherit;text-decoration:none;">退租辦法</a>
         </div>
       </div>
     </div>

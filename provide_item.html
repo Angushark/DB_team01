@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>上架品項 — 10gear 拾光機</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
+  <style>
+    .provide-container { max-width: 600px; margin: 0 auto; padding: 32px 16px; }
+    .provide-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 32px; box-shadow: var(--shadow-md); }
+    .provide-card h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .provide-card p.sub { font-size: 13px; color: var(--t3); margin-bottom: 28px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .notice-box { margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: #fffbeb; border: 1px solid #fde68a; }
+    .notice-box p { font-size: 12px; color: #92400e; line-height: 1.7; }
+    .my-items-section { margin-top: 32px; }
+    .my-items-section h2 { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+    .item-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface); margin-bottom: 8px; font-size: 13px;
+    }
+    .item-row__name { font-weight: 600; }
+    .item-row__meta { font-size: 11px; color: var(--t3); margin-top: 2px; }
+    .state-pill { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+    .state-available { background: var(--green-bg); color: var(--green); }
+    .state-unavailable { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+    .state-rented { background: var(--blue-bg); color: var(--blue); }
+  </style>
+</head>
+<body class="auth-page" style="display:block;">
+
+  <header style="background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px; position:sticky; top:0; z-index:50;">
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between;">
+      <a href="index.html" class="logo" style="text-decoration:none;"><img src="logo.png" alt="10gear" class="logo__img"><div class="logo__names"><span class="logo__zh">拾光機</span><span class="logo__en">10gear</span></div></a>
+      <a href="profile.html" class="btn-login" style="text-decoration:none;">← 返回個人中心</a>
+    </div>
+  </header>
+
+  <main style="padding:0;">
+    <div class="provide-container">
+
+      <!-- Submit Form -->
+      <div class="provide-card">
+        <h1>上架新品項</h1>
+        <p class="sub">上架後狀態預設為「審核中」，待管理員審核啟用後才可供租借</p>
+
+        <form id="provide-form" onsubmit="return false;">
+          <!-- Category -->
+          <div class="form-group">
+            <label>品項類別 <span class="required">*</span></label>
+            <select class="form-input" id="inp-category" required>
+              <option value="">請選擇</option>
+              <option value="equipment">器材 Equipment</option>
+              <option value="accessory">配件 Accessory</option>
+            </select>
+          </div>
+
+          <!-- Subtype (dynamic) -->
+          <div class="form-group" id="subtype-group">
+            <label>細項類型 <span class="required">*</span></label>
+            <select class="form-input" id="inp-subtype" required>
+              <option value="">請先選擇品項類別</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>品項名稱 <span class="required">*</span></label>
+              <input type="text" class="form-input" id="inp-name" placeholder="例如：Sony α7 IV" required>
+            </div>
+            <div class="form-group">
+              <label>品牌</label>
+              <input type="text" class="form-input" id="inp-brand" placeholder="例如：Sony">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>型號</label>
+              <input type="text" class="form-input" id="inp-model" placeholder="例如：ILCE-7M4">
+            </div>
+            <div class="form-group">
+              <label>每日租金 (NT$) <span class="required">*</span></label>
+              <input type="number" class="form-input" id="inp-rental" placeholder="例如：1200" min="1" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>種類描述</label>
+            <input type="text" class="form-input" id="inp-type" placeholder="例如：微單眼、腳架">
+          </div>
+
+          <div class="form-group">
+            <label>品項說明</label>
+            <input type="text" class="form-input" id="inp-desc" placeholder="例如：2022年出廠，狀況良好">
+          </div>
+
+          <div class="form-group">
+            <label>圖片網址</label>
+            <input type="text" class="form-input" id="inp-url" placeholder="https://...（選填）">
+          </div>
+
+          <button type="submit" class="btn-primary" id="btn-submit">送出上架申請</button>
+        </form>
+
+        <div class="auth-msg" id="msg"></div>
+
+        <div class="notice-box">
+          <p>上架後品項狀態為「審核中（unavailable）」，管理員審核通過並設為「available」後即可被租借。</p>
+        </div>
+      </div>
+
+      <!-- My Items -->
+      <div class="my-items-section">
+        <h2>我上架的品項</h2>
+        <div id="my-items-list">
+          <p style="color:var(--t3); font-size:13px;">載入中⋯</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    const STATE_MAP = {
+      available:   { label: '可租借',  cls: 'state-available' },
+      rented:      { label: '出租中',  cls: 'state-rented' },
+      unavailable: { label: '審核中',  cls: 'state-unavailable' },
+    };
+
+    const SUBTYPES = {
+      equipment: [
+        { value: 'camera',   label: '相機 Camera' },
+        { value: 'drone',    label: '無人機 Drone' },
+        { value: 'computer', label: '電腦 Computer' },
+        { value: 'gimbal',   label: '雲台 Gimbal' },
+        { value: 'lighting', label: '燈光 Lighting' },
+        { value: 'audio',    label: '音訊 Audio' },
+      ],
+      accessory: [
+        { value: 'lens',    label: '鏡頭 Lens' },
+        { value: 'tripod',  label: '腳架 Tripod' },
+        { value: 'battery', label: '電池 Battery' },
+        { value: 'storage', label: '記憶卡 Storage' },
+        { value: 'filter',  label: '濾鏡 Filter' },
+      ],
+    };
+
+    // Auth check
+    const user = JSON.parse(localStorage.getItem("lensrent_user") || "null");
+    if (!user) { window.location.href = "login.html"; }
+    if (!user?.roles?.isProvider) { window.location.href = "become_provider.html"; }
+
+    // Dynamic subtype dropdown
+    document.getElementById("inp-category").addEventListener("change", function() {
+      const sel = document.getElementById("inp-subtype");
+      sel.innerHTML = '<option value="">請選擇</option>';
+      (SUBTYPES[this.value] || []).forEach(o => {
+        sel.innerHTML += `<option value="${o.value}">${o.label}</option>`;
+      });
+    });
+
+    // Msg helper
+    const msgEl = document.getElementById("msg");
+    function showMsg(text, type) {
+      msgEl.textContent = text;
+      msgEl.className = "auth-msg visible auth-msg--" + type;
+    }
+
+    // Submit
+    document.getElementById("provide-form").addEventListener("submit", async () => {
+      const payload = {
+        item_category: document.getElementById("inp-category").value,
+        item_subtype:  document.getElementById("inp-subtype").value,
+        name:          document.getElementById("inp-name").value.trim(),
+        brand:         document.getElementById("inp-brand").value.trim(),
+        model:         document.getElementById("inp-model").value.trim(),
+        type:          document.getElementById("inp-type").value.trim(),
+        description:   document.getElementById("inp-desc").value.trim(),
+        rental:        parseFloat(document.getElementById("inp-rental").value),
+        url:           document.getElementById("inp-url").value.trim(),
+      };
+
+      if (!payload.item_category || !payload.name || !payload.rental) {
+        showMsg("請填寫品項類別、名稱與租金", "error"); return;
+      }
+
+      document.getElementById("btn-submit").disabled = true;
+      document.getElementById("btn-submit").textContent = "送出中…";
+
+      try {
+        const res  = await fetch("api/provide_item.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showMsg(data.message, "success");
+          document.getElementById("provide-form").reset();
+          loadMyItems();
+        } else {
+          showMsg(data.message, "error");
+        }
+      } catch(e) {
+        showMsg("連線失敗", "error");
+      }
+
+      document.getElementById("btn-submit").disabled = false;
+      document.getElementById("btn-submit").textContent = "送出上架申請";
+    });
+
+    // Load my items
+    async function loadMyItems() {
+      try {
+        const res  = await fetch("api/my_items.php", { credentials: "same-origin" });
+        const data = await res.json();
+        const el   = document.getElementById("my-items-list");
+        if (!data.success || data.items.length === 0) {
+          el.innerHTML = '<p style="color:var(--t3); font-size:13px;">尚未上架任何品項</p>';
+          return;
+        }
+        el.innerHTML = data.items.map(item => {
+          const st = STATE_MAP[item.rent_state] || { label: item.rent_state, cls: '' };
+          return `<div class="item-row">
+            <div>
+              <div class="item-row__name">${item.name}</div>
+              <div class="item-row__meta">${item.brand || ''} ${item.model || ''} · NT$ ${Number(item.rental).toLocaleString('zh-TW')}/日</div>
+            </div>
+            <span class="state-pill ${st.cls}">${st.label}</span>
+          </div>`;
+        }).join("");
+      } catch(e) {
+        document.getElementById("my-items-list").innerHTML = '<p style="color:var(--t3); font-size:13px;">無法載入品項</p>';
+      }
+    }
+
+    loadMyItems();
+  </script>
+</body>
+</html>
