@@ -7,6 +7,14 @@ if (empty($_SESSION['member_id'])) {
 }
 
 require_once '../db_config.php';
+$mid = $_SESSION['member_id'];
+
+// ── 只有 Renter 才能建立訂單 ───────────────────────────────
+$r = $conn->query("SELECT 1 FROM Renter WHERE member_id=$mid");
+if (!$r || $r->num_rows === 0) {
+    echo json_encode(['success' => false, 'message' => '僅限租借者身份可建立訂單']); exit;
+}
+
 $data        = json_decode(file_get_contents('php://input'), true);
 $rent_date   = trim($data['rent_date']   ?? '');
 $return_date = trim($data['return_date'] ?? '');
@@ -23,7 +31,20 @@ if (empty($cart)) {
     echo json_encode(['success' => false, 'message' => '購物車是空的']); exit;
 }
 
-$renter_id   = $conn->real_escape_string($_SESSION['member_id']);
+// ── 確認購物車內品項都是 available ────────────────────────
+foreach ($cart as $item) {
+    $iid = $conn->real_escape_string($item['item_id']);
+    $check = $conn->query("SELECT rent_state FROM Item WHERE item_id='$iid'");
+    if (!$check || $check->num_rows === 0) {
+        echo json_encode(['success' => false, 'message' => "品項 $iid 不存在"]); exit;
+    }
+    $state = $check->fetch_assoc()['rent_state'];
+    if ($state !== 'available') {
+        echo json_encode(['success' => false, 'message' => "品項「{$item['name']}」目前無法租借（狀態：$state）"]); exit;
+    }
+}
+
+$renter_id   = $conn->real_escape_string($mid);
 $rd          = $conn->real_escape_string($rent_date);
 $rrd         = $conn->real_escape_string($return_date);
 $days        = max(1, (int)(new DateTime($return_date))->diff(new DateTime($rent_date))->days);
@@ -44,3 +65,4 @@ $conn->query("UPDATE `Order` SET total_rental=(SELECT COALESCE(SUM(i.rental),0) 
 
 $_SESSION['cart'] = [];
 echo json_encode(['success' => true, 'order_id' => $order_id], JSON_UNESCAPED_UNICODE);
+?>
