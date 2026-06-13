@@ -27,7 +27,7 @@ if ($action === 'add') {
 } elseif ($action === 'remove') {
     $item_id = trim($data['item_id'] ?? '');
     $_SESSION['cart'] = array_values(array_filter($_SESSION['cart'] ?? [], fn($c) => $c['item_id'] !== $item_id));
-    echo json_encode(['success' => true, 'count' => count($_SESSION['cart'])], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['success' => true, 'cart' => $_SESSION['cart'], 'count' => count($_SESSION['cart'])], JSON_UNESCAPED_UNICODE);
 
 } elseif ($action === 'clear') {
     $_SESSION['cart'] = [];

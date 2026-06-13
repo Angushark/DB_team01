@@ -5,6 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>10gear 拾光機 — 攝影器材租賃平台</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    .date-filter-bar { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px 20px; margin:20px 0 8px; }
+    .date-filter-title { font-size:14px; font-weight:700; color:var(--t1); margin:0 0 12px; }
+    .date-filter-form { display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap; }
+    .date-filter-form .form-group { flex:1; min-width:140px; margin-bottom:0; }
+    .date-filter-meta { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+    .form-group { margin-bottom:14px; }
+    .form-group label { display:block; font-size:12px; font-weight:600; color:var(--t2); margin-bottom:6px; }
+    .flatpickr-input { width:100%; padding:9px 12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--t1); box-sizing:border-box; cursor:pointer; }
+    .flatpickr-input:focus { outline:none; border-color:var(--amber); }
+    .flatpickr-calendar { background:var(--card); border:1px solid var(--border); box-shadow:0 8px 24px rgba(0,0,0,.08); }
+    .flatpickr-day:hover { background:var(--amber-light,#fffbeb); }
+    .flatpickr-day.selected, .flatpickr-day.selected:hover { background:var(--amber); border-color:var(--amber); color:#fff; }
+    .date-filter-count { font-size:12px; color:var(--amber); font-weight:600; white-space:nowrap; }
+    .date-filter-clear { padding:6px 14px; background:transparent; border:1px solid var(--border); border-radius:8px; font-size:12px; color:var(--t3); cursor:pointer; white-space:nowrap; display:none; }
+    .date-filter-clear:hover { border-color:var(--amber); color:var(--amber); }
+    .btn-filter-confirm { padding:8px 20px; background:var(--amber); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+    .btn-filter-confirm:hover { background:var(--amber-dark,#b45309); }
+    .btn-filter-confirm:disabled { opacity:.6; cursor:not-allowed; }
+    /* Match calendar arrow to card background & border */
+    .flatpickr-calendar.arrowTop::before  { border-bottom-color:var(--border) !important; }
+    .flatpickr-calendar.arrowTop::after   { border-bottom-color:var(--card)   !important; }
+    .flatpickr-calendar.arrowBottom::before { border-top-color:var(--border) !important; }
+    .flatpickr-calendar.arrowBottom::after  { border-top-color:var(--card)   !important; }
+  </style>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
 </head>
 <body>
@@ -66,6 +92,28 @@
 
   <!-- ══ MAIN CONTENT ══════════════════════════════════════════════════════ -->
   <main class="container">
+
+    <!-- ── DATE FILTER BAR ────────────────────────────────────────────── -->
+    <div class="date-filter-bar">
+      <h3 class="date-filter-title">租借日期篩選</h3>
+      <div class="date-filter-form">
+        <div class="form-group">
+          <label>租借日期</label>
+          <input type="text" id="rent-date" placeholder="選擇日期">
+        </div>
+        <div class="form-group">
+          <label>歸還日期</label>
+          <input type="text" id="return-date" placeholder="選擇日期">
+        </div>
+        <div class="date-filter-meta">
+          <button id="btn-filter-confirm" class="btn-filter-confirm">確認篩選</button>
+          <span id="filter-count" class="date-filter-count"></span>
+        </div>
+      </div>
+      <div id="date-blocked-hint" style="display:none;font-size:12px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;margin-top:10px;">
+        ⚠️ 灰色日期為購物車內器材已被租借的期間，無法選取。
+      </div>
+    </div>
 
     <!-- ── FILTERED VIEW (hidden by default) ───────────────────────────── -->
     <section class="filtered-view hidden" id="filtered-view">
@@ -135,7 +183,7 @@
       <section class="section">
         <div class="section-head">
           <div>
-            <h2 class="section-head__title">相機 / 鏡頭</h2>
+            <h2 class="section-head__title">設備周邊</h2>
             <p class="section-head__sub">微單眼、類單眼、運動相機、電影機、鏡頭</p>
           </div>
         </div>
@@ -215,6 +263,8 @@
   <div class="toast" id="toast"></div>
 
   <!-- ══ SCRIPTS ═══════════════════════════════════════════════════════════ -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
   <script src="js/app.js"></script>
 
 </body>

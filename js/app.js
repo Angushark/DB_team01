@@ -5,7 +5,9 @@
 const state = {
   search: "", activeCat: "all",
   items: [], cartCount: 0, cartItemIds: new Set(),
-  bannerIdx: 0, toastTimer: null
+  bannerIdx: 0, toastTimer: null,
+  filterFrom: "", filterTo: "",
+  unavailableIds: new Set(),
 };
 const fmt = (n) => `NT$ ${Number(n).toLocaleString("zh-TW")}`;
 const $ = (sel) => document.querySelector(sel);
@@ -36,6 +38,106 @@ const PROMOS = [
   { title: "長租特惠方案", sub: "租借 7 天以上享折扣", icon: "📅" },
   { title: "攝影師套組", sub: "相機＋鏡頭＋腳架一次租", icon: "📷" },
 ];
+
+// ── Date filter helpers ──────────────────────────────────────────────────────
+function getDateStr(offsetDays = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+async function fetchUnavailableIds() {
+  if (!state.filterFrom || !state.filterTo) { state.unavailableIds = new Set(); return; }
+  try {
+    const r = await fetch(`api/available_dates_filter.php?from=${state.filterFrom}&to=${state.filterTo}`);
+    const data = await r.json();
+    if (data.success) state.unavailableIds = new Set(data.unavailable_item_ids.map(String));
+  } catch (e) { state.unavailableIds = new Set(); }
+}
+
+function dateFilteredItems() {
+  if (!state.filterFrom || !state.filterTo) return state.items;
+  return state.items.filter(p => !state.unavailableIds.has(String(p.item_id)));
+}
+
+function updateFilterCount() {
+  const countEl = document.getElementById("filter-count");
+  if (!countEl) return;
+  if (state.filterFrom && state.filterTo) {
+    countEl.textContent = `共 ${dateFilteredItems().length} 項可租借`;
+  } else {
+    countEl.textContent = "";
+  }
+}
+
+let rentPicker = null;
+let returnPicker = null;
+
+function fmtDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function saveDates(rentDate, returnDate) {
+  localStorage.setItem("lensrent_dates", JSON.stringify({ rent_date: rentDate, return_date: returnDate }));
+}
+
+function initRentPickers(blocked) {
+  if (!blocked) blocked = [];
+  const locale = (flatpickr.l10ns && flatpickr.l10ns.zh_tw) ? flatpickr.l10ns.zh_tw : "default";
+
+  var disableFn = blocked.length ? function(date) {
+    return blocked.some(function(r) {
+      var from = new Date(r.from + "T00:00:00");
+      var to   = new Date(r.to   + "T00:00:00");
+      return date >= from && date < to;
+    });
+  } : null;
+
+  if (rentPicker) rentPicker.destroy();
+  if (returnPicker) returnPicker.destroy();
+
+  rentPicker = flatpickr("#rent-date", {
+    dateFormat: "Y年n月j日",
+    locale: locale,
+    minDate: "today",
+    disable: disableFn ? [disableFn] : [],
+    onChange: async function(dates) {
+      if (!dates[0]) return;
+      state.filterFrom = fmtDate(dates[0]);
+      returnPicker.set("minDate", dates[0]);
+      if (!state.filterTo || state.filterTo <= state.filterFrom) {
+        const next = new Date(dates[0]);
+        next.setDate(next.getDate() + 1);
+        state.filterTo = fmtDate(next);
+        returnPicker.setDate(next, false);
+      }
+      await fetchUnavailableIds();
+      render();
+    },
+  });
+
+  returnPicker = flatpickr("#return-date", {
+    dateFormat: "Y年n月j日",
+    locale: locale,
+    minDate: state.filterFrom ? new Date(state.filterFrom + "T00:00:00") : "today",
+    disable: disableFn ? [disableFn] : [],
+    onChange: async function(dates) {
+      if (!dates[0]) return;
+      state.filterTo = fmtDate(dates[0]);
+      await fetchUnavailableIds();
+      render();
+    },
+  });
+
+  rentPicker.setDate(new Date(state.filterFrom + "T00:00:00"), false);
+  returnPicker.setDate(new Date(state.filterTo + "T00:00:00"), false);
+
+  const hint = document.getElementById("date-blocked-hint");
+  if (hint) hint.style.display = blocked.length > 0 ? "block" : "none";
+}
 
 // ── Data transform ──────────────────────────────────────────────────────────
 function transformItem(item) {
@@ -79,7 +181,7 @@ async function loadCart() {
 function getCartIds() { return state.cartItemIds; }
 function getCartCount() { return state.cartCount; }
 function getFilteredProducts() {
-  let items = state.items;
+  let items = dateFilteredItems();
   if (state.activeCat !== "all") items = items.filter(p => p.cat === state.activeCat);
   if (state.search.trim()) {
     const q = state.search.toLowerCase();
@@ -190,7 +292,7 @@ function renderFilteredView() {
 }
 
 function renderHomeView() {
-  const items = state.items;
+  const items = dateFilteredItems();
   const eq = items.filter(p => p.item_type === "equipment");
   const ac = items.filter(p => p.item_type === "accessory");
   $("#promo-grid").innerHTML = PROMOS.map((promo, i) => {
@@ -202,7 +304,7 @@ function renderHomeView() {
   $("#acc-grid").innerHTML = ac.map(p => renderProductCard(p)).join("");
 }
 
-function render() { renderCatNav(); renderCartBadge(); renderBanner(); renderContent(); renderAuthButtons(); }
+function render() { renderCatNav(); renderCartBadge(); renderBanner(); renderContent(); renderAuthButtons(); updateFilterCount(); }
 
 function initEvents() {
   const si = $("#search-input"), sc = $("#search-clear");
@@ -214,11 +316,40 @@ function initEvents() {
   document.body.addEventListener("click", e => {
     if (e.target.id === "clear-filter") { state.activeCat = "all"; render(); }
   });
+
+  const btnConfirm = $("#btn-filter-confirm");
+  if (btnConfirm) {
+    btnConfirm.addEventListener("click", async () => {
+      if (!state.filterFrom || !state.filterTo) return;
+      btnConfirm.disabled = true;
+      btnConfirm.textContent = "篩選中⋯";
+      await fetchUnavailableIds();
+      render();
+      btnConfirm.disabled = false;
+      btnConfirm.textContent = "確認篩選";
+    });
+  }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await Promise.all([loadItems(), loadCart()]);
+  state.filterFrom = getDateStr(0);
+  state.filterTo   = getDateStr(1);
+
+  await Promise.all([loadItems(), loadCart(), fetchUnavailableIds()]);
+
+  // Fetch blocked dates from items currently in cart
+  let blocked = [];
+  if (state.cartItemIds.size > 0) {
+    try {
+      const ids = [...state.cartItemIds].join(",");
+      const r = await fetch(`api/item_unavailable_dates.php?item_ids=${ids}`);
+      const data = await r.json();
+      if (data.success) blocked = data.blocked;
+    } catch (e) {}
+  }
+
   render();
   initEvents();
+  initRentPickers(blocked);
   setInterval(() => { state.bannerIdx = (state.bannerIdx + 1) % BANNERS.length; renderBanner(); }, 5000);
 });
