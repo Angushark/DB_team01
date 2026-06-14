@@ -6,6 +6,7 @@
   <title>申請成為出租方 — 10gear 拾光機</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
+<<<<<<< HEAD
   <style>
     .form-card {
       background: var(--surface); border: 1px solid var(--border);
@@ -145,6 +146,61 @@
 
     // Already a provider?
     if (r.isProvider) {
+=======
+</head>
+<body class="auth-page">
+
+  <header style="background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px;">
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between;">
+      <a href="index.html" class="logo" style="text-decoration:none;"><img src="logo.png" alt="10gear" class="logo__img"><div class="logo__names"><span class="logo__zh">拾光機</span><span class="logo__en">10gear</span></div></a>
+      <a href="profile.html" class="btn-login" style="text-decoration:none;">← 返回個人中心</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="auth-card">
+      <div class="auth-card__icon" style="font-size:36px;">🏪</div>
+      <h1 class="auth-card__title">申請成為出租方</h1>
+      <p class="auth-card__sub">填寫銀行帳號後即可開始上架器材，收取租借費用</p>
+
+      <div id="already-provider" class="auth-msg auth-msg--success" style="display:none; margin-bottom:16px;">
+        您已經是出租方身份，可直接前往上架器材。
+      </div>
+
+      <form id="provider-form" onsubmit="return false;">
+        <div class="form-group">
+          <label>銀行帳號 <span class="required">*</span></label>
+          <input type="text" class="form-input" id="inp-bank" placeholder="例如：004-123456789012" required>
+          <p style="font-size:11px; color:var(--t3); margin-top:4px;">租借費用將匯入此帳號，請確認填寫正確</p>
+        </div>
+        <button type="submit" class="btn-primary" id="btn-submit">確認申請</button>
+      </form>
+
+      <div class="auth-msg" id="msg"></div>
+
+      <div style="margin-top:20px; padding:14px 16px; border-radius:12px; background:var(--bg); border:1px solid var(--border);">
+        <p style="font-size:12px; font-weight:600; color:var(--t2); margin-bottom:6px;">出租方說明</p>
+        <ul style="font-size:12px; color:var(--t3); line-height:1.8; padding-left:16px;">
+          <li>申請後即同時保有租借者身份</li>
+          <li>新上架品項預設狀態為「審核中」，待管理員啟用後才可租借</li>
+          <li>品項出租中時不可修改</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const msg = document.getElementById("msg");
+    function showMsg(text, type) {
+      msg.textContent = text;
+      msg.className = "auth-msg visible auth-msg--" + type;
+    }
+
+    // 確認登入狀態與現有身份
+    const user = JSON.parse(localStorage.getItem("lensrent_user") || "null");
+    if (!user) { window.location.href = "login.html"; }
+    if (user?.roles?.isProvider) {
+>>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
       document.getElementById("already-provider").style.display = "block";
       document.getElementById("provider-form").style.display = "none";
     }
@@ -158,6 +214,7 @@
 
       try {
         const res = await fetch("api/become_provider.php", {
+<<<<<<< HEAD
           method: "POST", headers: { "Content-Type": "application/json" },
           credentials: "same-origin", body: JSON.stringify({ bank_account: bank })
         });
@@ -165,13 +222,30 @@
         if (data.success) {
           user.roles.isProvider = true;
           localStorage.setItem("lensrent_user", JSON.stringify(user));
+=======
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ bank_account: bank })
+        });
+        const data = await res.json();
+        if (data.success) {
+          // 更新 localStorage 角色
+          if (user) { user.roles.isProvider = true; localStorage.setItem("lensrent_user", JSON.stringify(user)); }
+>>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
           showMsg("申請成功！即將跳轉至上架頁面⋯", "success");
           setTimeout(() => window.location.href = "provide_item.html", 1500);
         } else {
           showMsg(data.message, "error");
         }
+<<<<<<< HEAD
       } catch(e) { showMsg("連線失敗", "error"); }
 
+=======
+      } catch(e) {
+        showMsg("連線失敗", "error");
+      }
+>>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
       document.getElementById("btn-submit").disabled = false;
       document.getElementById("btn-submit").textContent = "確認申請";
     });

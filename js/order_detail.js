@@ -14,6 +14,7 @@ function renderAuthButtons() {
   }
 }
 renderAuthButtons();
+<<<<<<< HEAD
 
 const STATE_MAP = {
   unpaid:    "未付款",
@@ -22,12 +23,21 @@ const STATE_MAP = {
   cancelled: "不成立",
 };
 const order_id = new URLSearchParams(location.search).get("id");
+=======
+const STATE_MAP = {
+  unpaid:    "未付款", confirmed: "訂單成立",
+  completed: "訂單完成", cancelled: "不成立",
+};
+const order_id = new URLSearchParams(location.search).get("id");
+let allItems = [];
+>>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
 let editRentPicker = null;
 let editReturnPicker = null;
 
 flatpickr.localize(flatpickr.l10ns.zh_tw);
 
 function renderDetail(order) {
+<<<<<<< HEAD
   const user    = JSON.parse(localStorage.getItem("lensrent_user") || "null");
   const isAdmin = user?.roles?.isAdmin === true;
   const isOwner = String(order.renter_id) === String(user?.member_id);
@@ -35,6 +45,13 @@ function renderDetail(order) {
   const st   = STATE_MAP[order.order_state] || order.order_state;
   const days = Math.max(1, Math.round((new Date(order.return_date) - new Date(order.rent_date)) / 864e5));
 
+=======
+  const user  = JSON.parse(localStorage.getItem("lensrent_user") || "null");
+  const isAdmin = user?.roles?.isAdmin === true;
+
+  const st = STATE_MAP[order.order_state] || order.order_state;
+  const days = Math.max(1, Math.round((new Date(order.return_date) - new Date(order.rent_date)) / 864e5));
+>>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
   const itemRows = order.items.length
     ? order.items.map(i => `<tr>
         <td style="font-family:monospace;font-size:11px;color:var(--t3);">${i.item_id}</td>
@@ -45,6 +62,7 @@ function renderDetail(order) {
       </tr>`).join("")
     : `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--t3);">尚無明細</td></tr>`;
 
+<<<<<<< HEAD
   // ── 付款面板：Renter 且訂單為 unpaid ────────────────────────────────
   const payPanel = (!isAdmin && isOwner && order.order_state === 'unpaid') ? `
     <div class="panel" id="pay-panel">
@@ -68,6 +86,9 @@ function renderDetail(order) {
     </div>` : "";
 
   // ── Admin 編輯面板 ────────────────────────────────────────────────────
+=======
+  // Edit panel: Admin only
+>>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
   const editPanel = isAdmin ? `
     <div class="panel">
       <div class="panel__title">編輯訂單</div>
@@ -97,13 +118,22 @@ function renderDetail(order) {
     </div>` : "";
 
   document.getElementById("detail-content").innerHTML = `
+<<<<<<< HEAD
     ${location.search.includes("new=1") ? '<div class="msg-box success" style="display:block;">✓ 訂單已建立成功！請付款以確認訂單。</div>' : ""}
 
+=======
+    ${location.search.includes("new=1") ? '<div class="msg-box success" style="display:block;">✓ 訂單已建立成功！</div>' : ""}
+
+    <!-- Order Info -->
+>>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <h1 style="font-size:20px;font-weight:700;margin:0;">訂單 #${order.order_id}</h1>
       <span class="order-state-badge order-state--${order.order_state}">${st}</span>
     </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     <div class="panel">
       <div class="info-grid">
         <div><div class="info-item__label">租借人</div><div class="info-item__value">${order.renter_name}</div></div>
@@ -114,9 +144,15 @@ function renderDetail(order) {
       </div>
     </div>
 
+<<<<<<< HEAD
     ${payPanel}
     ${editPanel}
 
+=======
+    ${editPanel}
+
+    <!-- Items -->
+>>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     <div class="panel">
       <div class="panel__title">訂單明細</div>
       <div id="items-msg" class="msg-box"></div>
@@ -126,6 +162,7 @@ function renderDetail(order) {
       </table>
     </div>`;
 
+<<<<<<< HEAD
   // ── 付款按鈕邏輯 ─────────────────────────────────────────────────────
   if (!isAdmin && isOwner && order.order_state === 'unpaid') {
     // 先顯示目前錢包餘額
@@ -174,6 +211,9 @@ function renderDetail(order) {
   }
 
   // ── Admin 編輯邏輯 ────────────────────────────────────────────────────
+=======
+  // Init flatpickr and save handler only for Admin
+>>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
   if (isAdmin) {
     editRentPicker = flatpickr("#edit-rent", {
       dateFormat: "Y-m-d", altInput: true, altFormat: "Y年n月j日",
@@ -229,6 +269,7 @@ function showMsg(id, text, type) {
 }
 
 async function loadDetail() {
+<<<<<<< HEAD
   if (!order_id) {
     document.getElementById("detail-content").innerHTML = '<div style="color:var(--red);padding:20px;">缺少訂單編號</div>';
     return;
@@ -236,6 +277,17 @@ async function loadDetail() {
   try {
     const res       = await fetch(`api/order_detail.php?order_id=${order_id}`, { credentials: "same-origin" });
     const orderData = await res.json();
+=======
+  if (!order_id) { document.getElementById("detail-content").innerHTML = '<div style="color:var(--red);padding:20px;">缺少訂單編號</div>'; return; }
+  try {
+    const [orderRes, itemsRes] = await Promise.all([
+      fetch(`api/order_detail.php?order_id=${order_id}`, { credentials: "same-origin" }),
+      fetch("api/items.php"),
+    ]);
+    const orderData = await orderRes.json();
+    const itemsData = await itemsRes.json();
+    if (itemsData.success) allItems = itemsData.items;
+>>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     if (orderData.success) renderDetail(orderData.order);
     else { localStorage.removeItem("lensrent_user"); window.location.href = `login.html?redirect=order_detail.html?id=${order_id}`; }
   } catch (e) {
