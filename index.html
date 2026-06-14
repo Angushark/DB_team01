@@ -98,12 +98,12 @@
       <h3 class="date-filter-title">租借日期篩選</h3>
       <div class="date-filter-form">
         <div class="form-group">
-          <label>租借日期</label>
-          <input type="text" id="rent-date" placeholder="選擇日期">
+          <label for="rent-date">租借日期</label>
+          <input type="text" id="rent-date" name="rent-date" placeholder="選擇日期">
         </div>
         <div class="form-group">
-          <label>歸還日期</label>
-          <input type="text" id="return-date" placeholder="選擇日期">
+          <label for="return-date">歸還日期</label>
+          <input type="text" id="return-date" name="return-date" placeholder="選擇日期">
         </div>
         <div class="date-filter-meta">
           <button id="btn-filter-confirm" class="btn-filter-confirm">確認篩選</button>
@@ -143,19 +143,22 @@
       <!-- ── QUICK CATEGORY TILES ────────────────────────────────────── -->
       <section class="cat-tiles">
         <div class="cat-tiles__grid" id="cat-tiles-grid">
-          <!-- Static: these don't change, rendered once -->
-          <button class="cat-tile" data-cat="mirrorless"><span class="cat-tile__icon">📷</span><span class="cat-tile__label">微單眼</span></button>
-          <button class="cat-tile" data-cat="compact"><span class="cat-tile__icon">📸</span><span class="cat-tile__label">類單眼</span></button>
-          <button class="cat-tile" data-cat="action"><span class="cat-tile__icon">🎬</span><span class="cat-tile__label">運動相機</span></button>
-          <button class="cat-tile" data-cat="cinema"><span class="cat-tile__icon">🎥</span><span class="cat-tile__label">電影機</span></button>
-          <button class="cat-tile" data-cat="lens"><span class="cat-tile__icon">🔭</span><span class="cat-tile__label">鏡頭</span></button>
-          <button class="cat-tile" data-cat="tripod"><span class="cat-tile__icon">📐</span><span class="cat-tile__label">腳架</span></button>
-          <button class="cat-tile" data-cat="memory"><span class="cat-tile__icon">💾</span><span class="cat-tile__label">記憶卡</span></button>
-          <button class="cat-tile" data-cat="adapter"><span class="cat-tile__icon">⭕</span><span class="cat-tile__label">轉接環</span></button>
-          <button class="cat-tile" data-cat="bag"><span class="cat-tile__icon">🎒</span><span class="cat-tile__label">相機包</span></button>
-          <button class="cat-tile" data-cat="battery"><span class="cat-tile__icon">🔋</span><span class="cat-tile__label">電池</span></button>
-          <button class="cat-tile" data-cat="light"><span class="cat-tile__icon">💡</span><span class="cat-tile__label">燈光</span></button>
-          <button class="cat-tile" data-cat="stabilizer"><span class="cat-tile__icon">🎯</span><span class="cat-tile__label">穩定器</span></button>
+          <button class="cat-tile" data-cat="digital_camera"><span class="cat-tile__label">數位相機</span></button>
+          <button class="cat-tile" data-cat="drone"><span class="cat-tile__label">空拍機</span></button>
+          <button class="cat-tile" data-cat="film_camera"><span class="cat-tile__label">底片相機</span></button>
+          <button class="cat-tile" data-cat="instant_camera"><span class="cat-tile__label">拍立得</span></button>
+          <button class="cat-tile" data-cat="action_camera"><span class="cat-tile__label">運動相機</span></button>
+          <button class="cat-tile" data-cat="pocket_camera"><span class="cat-tile__label">口袋相機</span></button>
+          <button class="cat-tile" data-cat="gimbal"><span class="cat-tile__label">穩定器</span></button>
+          <button class="cat-tile" data-cat="360_camera"><span class="cat-tile__label">360相機</span></button>
+          <button class="cat-tile" data-cat="computer"><span class="cat-tile__label">電腦</span></button>
+          <button class="cat-tile" data-cat="lighting"><span class="cat-tile__label">燈光</span></button>
+          <button class="cat-tile" data-cat="audio"><span class="cat-tile__label">音頻設備</span></button>
+          <button class="cat-tile" data-cat="lens"><span class="cat-tile__label">鏡頭</span></button>
+          <button class="cat-tile" data-cat="tripod"><span class="cat-tile__label">腳架</span></button>
+          <button class="cat-tile" data-cat="battery"><span class="cat-tile__label">電池</span></button>
+          <button class="cat-tile" data-cat="storage"><span class="cat-tile__label">記憶卡</span></button>
+          <button class="cat-tile" data-cat="filter"><span class="cat-tile__label">濾鏡</span></button>
         </div>
       </section>
 
@@ -265,7 +268,7 @@
   <!-- ══ SCRIPTS ═══════════════════════════════════════════════════════════ -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=2"></script>
 
 </body>
 </html>

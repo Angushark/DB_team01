@@ -4,23 +4,68 @@ const fmt = n => `NT$ ${Number(n).toLocaleString("zh-TW")}`;
 
 const RENT_LABEL = { available: "可租借", rented: "租借中", unavailable: "不可租借" };
 
-function renderSpecs(specsRaw) {
-  let obj;
-  try { obj = JSON.parse(specsRaw); } catch (e) { obj = null; }
+const EQUIP_TYPE_LABELS = {
+  digital_camera: "數位相機", drone: "空拍機", film_camera: "底片相機",
+  instant_camera: "拍立得", action_camera: "運動相機", pocket_camera: "口袋相機",
+  gimbal: "穩定器", "360_camera": "360相機", computer: "電腦",
+  lighting: "燈光", audio: "音頻設備",
+};
+const ACC_TYPE_LABELS = {
+  lens: "鏡頭", tripod: "腳架", battery: "電池", storage: "記憶卡", filter: "濾鏡",
+};
 
-  let body;
-  if (obj && typeof obj === "object" && !Array.isArray(obj)) {
-    const rows = Object.entries(obj).map(([k, v]) =>
-      `<tr><td>${k}</td><td>${v}</td></tr>`
-    ).join("");
-    body = `<table class="specs-table">${rows}</table>`;
+function renderSpecs(item) {
+  const rows = [];
+
+  if (item.type === "Equipment") {
+    const fields = [
+      ["equipment_type", "設備類型",   v => EQUIP_TYPE_LABELS[v] || v],
+      ["serial_number",  "序號",        null],
+      ["e_mount_type",   "卡口",        null],
+      ["sensor_size",    "感光元件",    null],
+      ["max_resolution", "最高解析度",  null],
+      ["weight",         "重量",        null],
+      ["battery",        "電池型號",    null],
+    ];
+    for (const [key, label, fmt] of fields) {
+      const v = item[key];
+      if (v !== null && v !== undefined && v !== "") {
+        rows.push(`<tr><td>${label}</td><td>${fmt ? fmt(v) : v}</td></tr>`);
+      }
+    }
   } else {
-    body = `<p style="font-size:13px;line-height:1.8;color:var(--t2);white-space:pre-line;">${specsRaw}</p>`;
+    const fields = [
+      ["accessory_type", "配件類型",     v => ACC_TYPE_LABELS[v] || v],
+      ["a_mount_type",   "卡口",         null],
+      ["focal_length",   "焦距",         null],
+      ["aperture",       "光圈",         null],
+      ["filter_size",    "濾鏡尺寸",     v => v + " mm"],
+    ];
+    for (const [key, label, fmt] of fields) {
+      const v = item[key];
+      if (v !== null && v !== undefined && v !== "" && v !== 0) {
+        rows.push(`<tr><td>${label}</td><td>${fmt ? fmt(v) : v}</td></tr>`);
+      }
+    }
   }
 
+  // specs JSON 欄位（從 Item.specs 欄位）
+  if (item.specs) {
+    let obj;
+    try { obj = JSON.parse(item.specs); } catch (e) { obj = null; }
+    if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+      for (const [k, v] of Object.entries(obj)) {
+        rows.push(`<tr><td>${k}</td><td>${v}</td></tr>`);
+      }
+    } else {
+      rows.push(`<tr><td colspan="2" style="white-space:pre-line;">${item.specs}</td></tr>`);
+    }
+  }
+
+  if (rows.length === 0) return "";
   return `<div class="panel">
     <div class="panel__title">規格說明</div>
-    ${body}
+    <table class="specs-table">${rows.join("")}</table>
   </div>`;
 }
 
@@ -140,7 +185,7 @@ function renderItem(item, inCart, cartCount) {
       <p style="font-size:14px;line-height:1.8;color:var(--t2);white-space:pre-line;">${item.description}</p>
     </div>` : ""}
 
-    ${item.specs ? renderSpecs(item.specs) : ""}
+    ${renderSpecs(item)}
 
     <div id="related-section"></div>
   `;
