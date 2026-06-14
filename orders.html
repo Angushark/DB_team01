@@ -3,19 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
   <title>我的訂單 — 10gear 拾光機</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
   <style>
-=======
-  <title>訂單管理 — 10gear 拾光機</title>
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
-  <style>
-    .page-header { background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px; position:sticky; top:0; z-index:50; }
-    .page-header .inner { display:flex; align-items:center; justify-content:space-between; }
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     .order-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 20px; margin-bottom:14px; }
     .order-card__header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
     .order-card__id { font-size:15px; font-weight:700; color:var(--t1); }
@@ -24,20 +15,13 @@
     .order-card__total { font-size:16px; font-weight:700; color:var(--amber); }
     .order-card__actions { display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
     .btn-action { padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:none; text-decoration:none; display:inline-flex; align-items:center; }
-<<<<<<< HEAD
     .btn-action--view   { background:var(--amber-light,#fffbeb); color:var(--amber); }
     .btn-action--delete { background:#fef2f2; color:var(--red,#dc2626); }
     .btn-action--view:hover   { background:var(--amber); color:#fff; }
-=======
-    .btn-action--view { background:var(--amber-light,#fffbeb); color:var(--amber); }
-    .btn-action--delete { background:#fef2f2; color:var(--red,#dc2626); }
-    .btn-action--view:hover { background:var(--amber); color:#fff; }
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     .btn-action--delete:hover { background:var(--red,#dc2626); color:#fff; }
   </style>
 </head>
 <body>
-<<<<<<< HEAD
   <header style="background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px; position:sticky; top:0; z-index:50; height:57px; box-sizing:border-box;">
     <div class="container" style="display:flex; align-items:center; justify-content:space-between; height:100%;">
       <a href="index.html" class="logo" style="text-decoration:none;"><img src="logo.png" alt="10gear" class="logo__img"><div class="logo__names"><span class="logo__zh">拾光機</span><span class="logo__en">10gear</span></div></a>
@@ -132,27 +116,6 @@
     window.location.href = "index.html";
   });
   </script>
-=======
-
-  <header class="page-header">
-    <div class="container inner">
-      <a href="index.html" class="logo" style="text-decoration:none;"><img src="logo.png" alt="10gear" class="logo__img"><div class="logo__names"><span class="logo__zh">拾光機</span><span class="logo__en">10gear</span></div></a>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <a href="cart.html" class="btn-login" style="text-decoration:none;">🛒 購物車</a>
-        <a href="index.html" class="btn-login" style="text-decoration:none;">← 回首頁</a>
-      </div>
-    </div>
-  </header>
-
-  <main class="container" style="padding:28px 16px 60px;">
-    <h1 style="font-size:22px;font-weight:700;margin-bottom:4px;">訂單管理</h1>
-    <p style="font-size:13px;color:var(--t3);margin-bottom:24px;">查看、編輯或刪除你的租借訂單</p>
-    <div id="orders-content">
-      <div style="text-align:center;padding:60px;color:var(--t3);">載入中⋯</div>
-    </div>
-  </main>
-
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
   <script src="js/orders.js"></script>
 </body>
 </html>

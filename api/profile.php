@@ -10,11 +10,7 @@ if (!isset($_SESSION['member_id'])) {
 
 $member_id = $_SESSION['member_id'];
 
-<<<<<<< HEAD
 $stmt = $conn->prepare("SELECT member_id, username, email, reg_date, phone_number, balance FROM Member WHERE member_id = ?");
-=======
-$stmt = $conn->prepare("SELECT member_id, username, email, reg_date, phone_number FROM Member WHERE member_id = ?");
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
 $stmt->bind_param("i", $member_id);
 $stmt->execute();
 $result = $stmt->get_result();

@@ -7,12 +7,6 @@
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
   <style>
-<<<<<<< HEAD
-=======
-    .admin-wrap { max-width: 1000px; margin: 0 auto; padding: 32px 16px; }
-    .admin-title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
-    .admin-sub   { font-size: 13px; color: var(--t3); margin-bottom: 28px; }
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     .admin-tabs  { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
     .admin-tab   { padding: 9px 18px; font-size: 13px; font-weight: 500; border: none; background: none; cursor: pointer; color: var(--t3); border-bottom: 2px solid transparent; transition: all .15s; }
     .admin-tab.active { color: var(--amber); border-bottom-color: var(--amber); font-weight: 600; }
@@ -22,7 +16,6 @@
     th { text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--t3); border-bottom: 2px solid var(--border); background: var(--bg); }
     td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:hover td { background: #fafafa; }
-<<<<<<< HEAD
     .state-pill     { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px; display:inline-block; }
     .pill-unpaid    { background: #fef3c7; color: #92400e; }
     .pill-confirmed { background: var(--blue-bg); color: var(--blue); }
@@ -31,16 +24,6 @@
     .pill-available { background: var(--green-bg); color: var(--green); }
     .pill-rented    { background: var(--blue-bg); color: var(--blue); }
     .pill-unavailable { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
-=======
-    .state-pill { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px; display:inline-block; }
-    .pill-unpaid     { background: #fef3c7; color: #92400e; }
-    .pill-confirmed  { background: var(--blue-bg); color: var(--blue); }
-    .pill-completed  { background: var(--green-bg); color: var(--green); }
-    .pill-cancelled  { background: #f5f5f5; color: var(--t3); }
-    .pill-available  { background: var(--green-bg); color: var(--green); }
-    .pill-rented     { background: var(--blue-bg); color: var(--blue); }
-    .pill-unavailable{ background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     select.state-sel { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--t1); outline: none; }
     .btn-apply { padding: 4px 12px; border-radius: 6px; border: none; background: var(--amber); color: #fff; font-size: 11px; font-weight: 600; cursor: pointer; }
     .btn-apply:hover { background: #b45309; }
@@ -49,7 +32,6 @@
     .feedback.err { color: var(--red); }
   </style>
 </head>
-<<<<<<< HEAD
 <body>
   <header style="background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px; position:sticky; top:0; z-index:50; height:57px; box-sizing:border-box;">
     <div class="container" style="display:flex; align-items:center; justify-content:space-between; height:100%;">
@@ -156,43 +138,6 @@
            <p style="font-size:16px;font-weight:700;margin-bottom:8px;">🔒 僅限管理員</p>
            <a href="profile.html" style="color:var(--amber);">返回個人中心</a>
          </div>`;
-=======
-<body style="background:var(--bg); min-height:100vh;">
-
-  <header style="background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px; position:sticky; top:0; z-index:50;">
-    <div class="container" style="display:flex; align-items:center; justify-content:space-between;">
-      <a href="index.html" class="logo" style="text-decoration:none;"><img src="logo.png" alt="10gear" class="logo__img"><div class="logo__names"><span class="logo__zh">拾光機</span><span class="logo__en">10gear</span></div></a>
-      <a href="profile.html" class="btn-login" style="text-decoration:none;">← 個人中心</a>
-    </div>
-  </header>
-
-  <div class="admin-wrap">
-    <h1 class="admin-title">管理後台</h1>
-    
-
-    <div class="admin-tabs">
-      <button class="admin-tab active" data-section="orders">訂單管理</button>
-      <button class="admin-tab" data-section="items">品項管理</button>
-    </div>
-
-    <!-- ══ 訂單管理 ═══════════════════════════════════════════════════════ -->
-    <div class="admin-section active" id="sec-orders">
-      <div id="orders-table-wrap"><p style="color:var(--t3);font-size:13px;">載入中⋯</p></div>
-    </div>
-
-    <!-- ══ 品項管理 ═══════════════════════════════════════════════════════ -->
-    <div class="admin-section" id="sec-items">
-      <div id="items-table-wrap"><p style="color:var(--t3);font-size:13px;">載入中⋯</p></div>
-    </div>
-  </div>
-
-  <script>
-    // ── Auth check ──────────────────────────────────────────────────────
-    const user = JSON.parse(localStorage.getItem("lensrent_user") || "null");
-    if (!user) { window.location.href = "login.html"; }
-    if (!user?.roles?.isAdmin) {
-      document.querySelector(".admin-wrap").innerHTML = `<div style="text-align:center;padding:80px 20px;color:var(--t3);"><p style="font-size:18px;font-weight:700;">🔒 僅限管理員</p><a href="profile.html" style="color:var(--amber);">返回個人中心</a></div>`;
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     }
 
     const ORDER_STATES = ['unpaid','confirmed','completed','cancelled'];
@@ -200,11 +145,7 @@
     const ORDER_LABEL  = { unpaid:'未付款', confirmed:'訂單成立', completed:'已完成', cancelled:'已取消' };
     const ITEM_LABEL   = { available:'可租借', rented:'出租中', unavailable:'審核中' };
 
-<<<<<<< HEAD
     // Tabs
-=======
-    // ── Tabs ────────────────────────────────────────────────────────────
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     document.querySelectorAll(".admin-tab").forEach(btn => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".admin-tab").forEach(b => b.classList.remove("active"));
@@ -214,11 +155,7 @@
       });
     });
 
-<<<<<<< HEAD
     // Load Orders
-=======
-    // ── Load Orders ─────────────────────────────────────────────────────
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     async function loadOrders() {
       try {
         const res  = await fetch("api/admin_orders.php", { credentials: "same-origin" });
@@ -227,21 +164,10 @@
 
         const rows = data.orders.map(o => {
           const days = o.rent_date && o.return_date
-<<<<<<< HEAD
             ? Math.max(1, Math.round((new Date(o.return_date) - new Date(o.rent_date)) / 864e5)) : '—';
           const itemRows = (o.items && o.items.length)
             ? o.items.map(i => {
                 const stCls = i.rent_state === 'rented' ? 'color:#2563eb' : i.rent_state === 'available' ? 'color:#059669' : 'color:#c2410c';
-=======
-            ? Math.max(1, Math.round((new Date(o.return_date) - new Date(o.rent_date)) / 864e5))
-            : '—';
-
-          const itemRows = (o.items && o.items.length)
-            ? o.items.map(i => {
-                const stCls = i.rent_state === 'rented'
-                  ? 'color:#2563eb' : i.rent_state === 'available'
-                  ? 'color:#059669' : 'color:#c2410c';
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
                 return `<tr style="font-size:12px;">
                   <td style="padding:5px 10px;font-family:var(--font-mono);color:var(--t3);">${i.item_id}</td>
                   <td style="padding:5px 10px;font-weight:600;">${i.name}</td>
@@ -272,7 +198,6 @@
               <div style="margin:0 12px;">
                 <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--t3);text-transform:uppercase;padding:6px 0 4px;">品項明細</div>
                 <table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:8px;overflow:hidden;border:1px solid var(--border);">
-<<<<<<< HEAD
                   <thead><tr style="background:var(--bg);">
                     <th style="padding:5px 10px;font-size:10px;color:var(--t3);font-weight:700;text-align:left;border-bottom:1px solid var(--border);">ID</th>
                     <th style="padding:5px 10px;font-size:10px;color:var(--t3);font-weight:700;text-align:left;border-bottom:1px solid var(--border);">名稱</th>
@@ -280,17 +205,6 @@
                     <th style="padding:5px 10px;font-size:10px;color:var(--t3);font-weight:700;text-align:left;border-bottom:1px solid var(--border);">日租金</th>
                     <th style="padding:5px 10px;font-size:10px;color:var(--t3);font-weight:700;text-align:left;border-bottom:1px solid var(--border);">品項狀態</th>
                   </tr></thead>
-=======
-                  <thead>
-                    <tr style="background:var(--bg);">
-                      <th style="padding:5px 10px;font-size:10px;color:var(--t3);font-weight:700;letter-spacing:0.5px;text-align:left;border-bottom:1px solid var(--border);">ID</th>
-                      <th style="padding:5px 10px;font-size:10px;color:var(--t3);font-weight:700;letter-spacing:0.5px;text-align:left;border-bottom:1px solid var(--border);">名稱</th>
-                      <th style="padding:5px 10px;font-size:10px;color:var(--t3);font-weight:700;letter-spacing:0.5px;text-align:left;border-bottom:1px solid var(--border);">品牌 / 型號</th>
-                      <th style="padding:5px 10px;font-size:10px;color:var(--t3);font-weight:700;letter-spacing:0.5px;text-align:left;border-bottom:1px solid var(--border);">日租金</th>
-                      <th style="padding:5px 10px;font-size:10px;color:var(--t3);font-weight:700;letter-spacing:0.5px;text-align:left;border-bottom:1px solid var(--border);">品項狀態</th>
-                    </tr>
-                  </thead>
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
                   <tbody>${itemRows}</tbody>
                 </table>
               </div>
@@ -323,11 +237,7 @@
       } catch(e) { fb.textContent = "失敗"; fb.className = "feedback err"; }
     }
 
-<<<<<<< HEAD
     // Load Items
-=======
-    // ── Load Items ──────────────────────────────────────────────────────
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
     async function loadItems() {
       try {
         const res  = await fetch("api/items.php", { credentials: "same-origin" });
@@ -375,12 +285,7 @@
       } catch(e) { fb.textContent = "失敗"; fb.className = "feedback err"; }
     }
 
-<<<<<<< HEAD
     if (r.isAdmin) { loadOrders(); loadItems(); }
-=======
-    // ── Init ────────────────────────────────────────────────────────────
-    if (user?.roles?.isAdmin) { loadOrders(); loadItems(); }
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
   </script>
 </body>
 </html>

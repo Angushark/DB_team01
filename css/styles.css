@@ -424,7 +424,6 @@ input::placeholder { color: var(--t3); }
   cursor: pointer; transition: all .15s;
 }
 .btn-logout:hover { background: var(--red); color: #fff; }
-<<<<<<< HEAD
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SHARED SIDEBAR LAYOUT (profile, orders, wallet, provide_item, etc.)
@@ -502,5 +501,3 @@ input::placeholder { color: var(--t3); }
   min-width: 0;
   max-width: 740px;
 }
-=======
->>>>>>> 85cee922cbe908c7b091f9001c975395b602f3a4
