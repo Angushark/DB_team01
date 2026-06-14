@@ -13,10 +13,18 @@ const fmt = (n) => `NT$ ${Number(n).toLocaleString("zh-TW")}`;
 const $ = (sel) => document.querySelector(sel);
 
 const CATEGORIES = [
-  { id: "all",       label: "全部商品", icon: "📦" },
-  { id: "equipment", label: "設備器材", icon: "📷" },
-  { id: "accessory", label: "配件周邊", icon: "🎒" },
+  { id: "all",       label: "全部商品" },
+  { id: "equipment", label: "設備器材" },
+  { id: "accessory", label: "配件周邊" },
 ];
+
+const SUB_TYPE_LABELS = {
+  digital_camera: "數位相機", drone: "空拍機", film_camera: "底片相機",
+  instant_camera: "拍立得",  action_camera: "運動相機", pocket_camera: "口袋相機",
+  gimbal: "穩定器", "360_camera": "360相機", computer: "電腦",
+  lighting: "燈光", audio: "音頻設備",
+  lens: "鏡頭", tripod: "腳架", battery: "電池", storage: "記憶卡", filter: "濾鏡",
+};
 
 const BANNER_OVERRIDES = [
   { bg: "linear-gradient(135deg, #78350f 0%, #92400e 50%, #451a03 100%)" },
@@ -148,6 +156,7 @@ function transformItem(item) {
     name: item.name, brand: item.brand || "", model: item.model || "",
     item_type: isEquip ? "equipment" : "accessory",
     cat: isEquip ? "equipment" : "accessory",
+    sub_type: isEquip ? (item.equipment_type || "") : (item.accessory_type || ""),
     rent_state: stateMap[item.rent_state] || "不可用",
     original_rent_state: item.rent_state,
     rental: parseFloat(item.rental) || 0,
@@ -162,7 +171,10 @@ async function loadItems() {
   try {
     const r = await fetch("api/items.php");
     const data = await r.json();
-    if (data.success) state.items = data.items.map(transformItem);
+    if (data.success) {
+      state.items = data.items.map(transformItem);
+      console.log("[DEBUG] items sample:", state.items.slice(0, 3).map(p => ({ name: p.name, sub_type: p.sub_type, cat: p.cat })));
+    }
   } catch (e) { console.error("loadItems failed", e); }
 }
 
@@ -182,7 +194,14 @@ function getCartIds() { return state.cartItemIds; }
 function getCartCount() { return state.cartCount; }
 function getFilteredProducts() {
   let items = dateFilteredItems();
-  if (state.activeCat !== "all") items = items.filter(p => p.cat === state.activeCat);
+  if (state.activeCat !== "all") {
+    if (state.activeCat === "equipment" || state.activeCat === "accessory") {
+      items = items.filter(p => p.cat === state.activeCat);
+    } else {
+      console.log("[DEBUG] filtering by sub_type:", state.activeCat, "| available sub_types:", [...new Set(items.map(p => p.sub_type))]);
+      items = items.filter(p => p.sub_type === state.activeCat);
+    }
+  }
   if (state.search.trim()) {
     const q = state.search.toLowerCase();
     items = items.filter(p =>
@@ -282,7 +301,7 @@ function renderContent() {
 
 function renderFilteredView() {
   const products = getFilteredProducts();
-  const catLabel = CATEGORIES.find(c => c.id === state.activeCat)?.label || "全部商品";
+  const catLabel = CATEGORIES.find(c => c.id === state.activeCat)?.label || SUB_TYPE_LABELS[state.activeCat] || "全部商品";
   const title = state.search ? "「" + state.search + "」的搜尋結果" : catLabel;
   let clearBtn = state.activeCat !== "all" ? ' · <button class="filtered-view__clear" id="clear-filter">清除篩選</button>' : "";
   let content = products.length === 0
