@@ -30,6 +30,45 @@
     .flatpickr-calendar.arrowTop::after   { border-bottom-color:var(--card)   !important; }
     .flatpickr-calendar.arrowBottom::before { border-top-color:var(--border) !important; }
     .flatpickr-calendar.arrowBottom::after  { border-top-color:var(--card)   !important; }
+
+    /* ── Bundle Modal ─────────────────────────────────────────────────────── */
+    .bundle-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:2000;
+      display:flex; align-items:center; justify-content:center; padding:20px;
+      backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); }
+    .bundle-modal { background:var(--card); border-radius:20px; padding:28px 24px;
+      width:100%; max-width:580px; position:relative;
+      box-shadow:0 24px 64px rgba(0,0,0,.2); }
+    .bundle-modal__close { position:absolute; top:14px; right:14px; background:var(--bg);
+      border:1px solid var(--border); border-radius:50%; width:32px; height:32px;
+      font-size:15px; cursor:pointer; color:var(--t2); display:flex; align-items:center;
+      justify-content:center; line-height:1; }
+    .bundle-modal__close:hover { border-color:var(--t1); color:var(--t1); }
+    .bundle-items-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px; }
+    @media(max-width:480px){ .bundle-items-grid{ grid-template-columns:1fr; } }
+    .bundle-item { background:var(--bg); border-radius:12px; overflow:hidden; border:1px solid var(--border); }
+    .bundle-item.in-cart { border-color:var(--amber); }
+    .bundle-item__img { aspect-ratio:4/3; overflow:hidden; position:relative; background:#f5f5f5; }
+    .bundle-item__img img { width:100%; height:100%; object-fit:cover; display:block; }
+    .bundle-item__info { padding:10px 12px; }
+    .bundle-item__name { font-size:12px; font-weight:600; color:var(--t1); line-height:1.4; margin-bottom:6px; }
+    .bundle-item__price { font-size:13px; font-weight:700; color:var(--amber); }
+    .bundle-item__price span { font-size:10px; font-weight:400; color:var(--t3); }
+    .bundle-item__tag { font-size:10px; background:var(--amber); color:#fff;
+      padding:2px 7px; border-radius:20px; display:inline-block; margin-bottom:5px; font-weight:600; }
+    .bundle-item__in-cart { font-size:10px; color:#16a34a; font-weight:600; margin-bottom:5px; }
+    .bundle-total { display:flex; justify-content:space-between; align-items:center;
+      background:var(--bg); border-radius:10px; padding:12px 16px; margin-bottom:16px;
+      border:1px solid var(--border); }
+    .bundle-modal__btn { width:100%; padding:12px; background:var(--amber); color:#fff;
+      border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; }
+    .bundle-modal__btn:hover:not(:disabled) { background:var(--amber-dark,#b45309); }
+    .bundle-modal__btn:disabled { opacity:.6; cursor:not-allowed; }
+    .bundle-modal__btn.all-added { background:#16a34a; }
+    /* promo tile clickable hint */
+    .promo-tile--bundle { cursor:pointer; }
+    .promo-tile--bundle:hover { filter:brightness(1.08); }
+    .promo-tile__hint { font-size:11px; color:rgba(255,255,255,0.75); margin-top:8px;
+      font-weight:500; letter-spacing:0.3px; }
   </style>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
 </head>
@@ -130,9 +169,10 @@
           <div class="hero__circle hero__circle--2" id="hero-circle-2"></div>
           <div class="hero__content">
             <div class="hero__label" id="hero-label">10gear 精選</div>
-            <h2 class="hero__title" id="hero-title"></h2>
-            <p class="hero__sub" id="hero-sub"></p>
-            <button class="hero__cta" id="hero-cta"></button>
+            <div class="hero__title-row">
+              <h2 class="hero__title" id="hero-title"></h2>
+              <p class="hero__sub" id="hero-sub"></p>
+            </div>
           </div>
           <div class="hero__dots" id="hero-dots">
             <!-- Rendered by JS -->
@@ -262,13 +302,20 @@
     </div>
   </footer>
 
+  <!-- ══ BUNDLE MODAL ════════════════════════════════════════════════════════ -->
+  <div id="bundle-overlay" class="bundle-overlay" style="display:none;" role="dialog" aria-modal="true">
+    <div class="bundle-modal" id="bundle-modal-box">
+      <!-- filled by app.js -->
+    </div>
+  </div>
+
   <!-- ══ TOAST ═════════════════════════════════════════════════════════════ -->
   <div class="toast" id="toast"></div>
 
   <!-- ══ SCRIPTS ═══════════════════════════════════════════════════════════ -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/app.js?v=4"></script>
 
 </body>
 </html>

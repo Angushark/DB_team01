@@ -11,8 +11,11 @@ function fmtPickerDate(d) {
 }
 
 function updateTotalDisplay() {
-  var daysEl   = document.getElementById("days-text");
-  var totalEl  = document.getElementById("total-text");
+  var daysEl      = document.getElementById("days-text");
+  var totalEl     = document.getElementById("total-text");
+  var discountRow = document.getElementById("discount-row");
+  var discountLbl = document.getElementById("discount-label");
+  var discountAmt = document.getElementById("discount-amount");
   var subtotal = window._cartSubtotal || 0;
   var rentDate   = rentPicker   ? rentPicker.selectedDates[0]   : null;
   var returnDate = returnPicker ? returnPicker.selectedDates[0] : null;
@@ -20,11 +23,31 @@ function updateTotalDisplay() {
   if (rentDate && returnDate) {
     var diff = Math.round((returnDate - rentDate) / 86400000);
     var days = Math.max(1, diff);
-    if (daysEl)  daysEl.textContent  = days + " 天";
-    if (totalEl) totalEl.textContent = fmt(subtotal * days);
+    if (daysEl) daysEl.textContent = days + " 天";
+
+    var baseTotal = subtotal * days;
+    var discount = 0;
+    var discountLabel = null;
+    if (days > 30) { discount = 0.20; discountLabel = "長租30天以上折扣 (-20%)"; }
+    else if (days > 7) { discount = 0.10; discountLabel = "長租7天以上折扣 (-10%)"; }
+    if (window._isFirstOrder && discount < 0.10) { discount = 0.10; discountLabel = "首次租借優惠 (-10%)"; }
+
+    var finalTotal = Math.round(baseTotal * (1 - discount));
+    if (totalEl) totalEl.textContent = fmt(finalTotal);
+
+    if (discountRow) {
+      if (discount > 0) {
+        discountRow.style.display = "flex";
+        if (discountLbl) discountLbl.textContent = discountLabel;
+        if (discountAmt) discountAmt.textContent = "-" + fmt(baseTotal - finalTotal);
+      } else {
+        discountRow.style.display = "none";
+      }
+    }
   } else {
-    if (daysEl)  daysEl.textContent  = "—";
+    if (daysEl)  daysEl.textContent = "—";
     if (totalEl) totalEl.textContent = fmt(subtotal);
+    if (discountRow) discountRow.style.display = "none";
   }
 }
 
@@ -174,6 +197,17 @@ async function clearCart() {
   }
 }
 
+// ── First-order discount check ────────────────────────────────────────────────
+async function loadUserOrderCount() {
+  var user = JSON.parse(localStorage.getItem("lensrent_user") || "null");
+  if (!user) { window._isFirstOrder = false; return; }
+  try {
+    var r = await fetch("api/orders.php", { credentials: "same-origin" });
+    var data = await r.json();
+    if (data.success) window._isFirstOrder = (data.orders.length === 0);
+  } catch (e) { window._isFirstOrder = false; }
+}
+
 // ── Create order ──────────────────────────────────────────────────────────────
 document.getElementById("btn-create").addEventListener("click", async function() {
   var user = JSON.parse(localStorage.getItem("lensrent_user") || "null");
@@ -201,7 +235,13 @@ document.getElementById("btn-create").addEventListener("click", async function()
       return;
     }
     if (data.success) {
-      window.location.href = "order_detail.html?id=" + data.order_id + "&new=1";
+      if (data.discount_type) {
+        var discMsgs = { first_order: "首次租借享 9 折優惠已套用！", long_7: "長租 7 天以上享 9 折優惠已套用！", long_30: "長租 30 天以上享 8 折優惠已套用！" };
+        showMsg("order-msg", "✓ 訂單建立成功！" + (discMsgs[data.discount_type] || "折扣已套用"), "success");
+        setTimeout(function() { window.location.href = "order_detail.html?id=" + data.order_id + "&new=1"; }, 1800);
+      } else {
+        window.location.href = "order_detail.html?id=" + data.order_id + "&new=1";
+      }
     } else if (data.message === "請先登入") {
       localStorage.removeItem("lensrent_user");
       window.location.href = "login.html?redirect=cart.html";
@@ -234,4 +274,5 @@ var user = JSON.parse(localStorage.getItem("lensrent_user") || "null");
 if (!user) document.getElementById("login-hint").style.display = "block";
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-loadCart();
+window._isFirstOrder = false;
+loadUserOrderCount().then(function() { loadCart(); });

@@ -110,7 +110,7 @@ function showCartMsg(text, type) {
 
 function renderItem(item, inCart, cartCount) {
   updateCartBadge(cartCount);
-  document.title = `${item.name} — LensRent`;
+  document.title = `${item.name} — 10gear 拾光機`;
 
   const available = item.rent_state === "available";
   const isEquip = item.type === "Equipment";

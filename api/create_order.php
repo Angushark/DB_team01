@@ -15,6 +15,7 @@ try {
     }
 
     require_once '../db_config.php';
+    require_once 'sync_states.php';
     $mid = (int)$_SESSION['member_id'];
 
     // 只有 Renter 才能建立訂單
@@ -86,6 +87,16 @@ try {
     }
     $stmt_chk->close();
 
+    // 計算折扣（首次租借 / 長租）
+    $res_cnt = $conn->query("SELECT COUNT(*) AS cnt FROM `Order` WHERE renter_id=$mid");
+    $is_first_order = ($res_cnt && (int)$res_cnt->fetch_assoc()['cnt'] === 0);
+    $discount = 0.0;
+    $discount_type = null;
+    if ($days > 30) { $discount = 0.20; $discount_type = 'long_30'; }
+    elseif ($days > 7) { $discount = 0.10; $discount_type = 'long_7'; }
+    if ($is_first_order && $discount < 0.10) { $discount = 0.10; $discount_type = 'first_order'; }
+    $multiplier = number_format(1.0 - $discount, 2, '.', '');
+
     // 產生新 order_id
     $res_id = $conn->query("SELECT COALESCE(MAX(CAST(order_id AS UNSIGNED)), 0) + 1 AS next_id FROM `Order`");
     if (!$res_id) {
@@ -109,20 +120,21 @@ try {
         $conn->query("INSERT INTO `Contains` (order_id, item_id) VALUES ('$order_id','$iid')");
     }
 
-    // 更新 total_rental
+    // 更新 total_rental（含折扣）
     $conn->query(
         "UPDATE `Order`
-         SET total_rental = (
+         SET total_rental = ROUND((
              SELECT COALESCE(SUM(i.rental), 0)
              FROM `Contains` c
              JOIN Item i ON c.item_id = i.item_id
              WHERE c.order_id = '$order_id'
-         ) * $days
+         ) * $days * $multiplier)
          WHERE order_id = '$order_id'"
     );
 
     $_SESSION['cart'] = [];
-    send_json(['success' => true, 'order_id' => $order_id]);
+    sync_item_states($conn);
+    send_json(['success' => true, 'order_id' => $order_id, 'discount_type' => $discount_type, 'discount_pct' => (int)($discount * 100)]);
 
 } catch (Throwable $e) {
     ob_clean();

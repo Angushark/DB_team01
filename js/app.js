@@ -8,6 +8,7 @@ const state = {
   bannerIdx: 0, toastTimer: null,
   filterFrom: "", filterTo: "",
   unavailableIds: new Set(),
+  dateFilterActive: false,
 };
 const fmt = (n) => `NT$ ${Number(n).toLocaleString("zh-TW")}`;
 const $ = (sel) => document.querySelector(sel);
@@ -37,15 +38,28 @@ const PROMO_OVERRIDES = [
   { bg: "linear-gradient(135deg, #1e40af, #2563eb)" },
 ];
 const BANNERS = [
-  { title: "頂級攝影器材，輕鬆租借", subtitle: "超過百款相機、鏡頭、配件任你選", cta: "立即瀏覽" },
-  { title: "專業穩定器出租", subtitle: "拍出電影感，輕鬆駕馭每個場景", cta: "查看穩定器" },
-  { title: "全套燈光設備租借", subtitle: "商業攝影、婚禮記錄一次搞定", cta: "瀏覽燈光設備" },
+  { title: "頂級攝影器材，輕鬆租借", subtitle: "超過百款相機、鏡頭、配件任你選" },
+  { title: "專業穩定器出租", subtitle: "拍出電影感，輕鬆駕馭每個場景" },
+  { title: "全方位器材", subtitle: "一站式租借" },
 ];
 const PROMOS = [
   { title: "首次租借優惠", sub: "新會員首單享 9 折", icon: "🎁" },
-  { title: "長租特惠方案", sub: "租借 7 天以上享折扣", icon: "📅" },
-  { title: "攝影師套組", sub: "相機＋鏡頭＋腳架一次租", icon: "📷" },
+  { title: "長租特惠方案", sub: "租超過 7 天享 9 折 · 超過 30 天享 8 折", icon: "📅" },
+  { title: "攝影師套組", sub: "相機＋鏡頭＋腳架一次租", icon: "📷", bundle: "photographer" },
 ];
+
+const BUNDLES = {
+  photographer: {
+    title: "攝影師套組",
+    sub: "相機＋鏡頭＋腳架，一次備齊",
+    icon: "📷",
+    items: [
+      { item_id: "1",   name: "Sony A7M4 全片幅微單眼機身",      rental: 1200, url: "https://raw.githubusercontent.com/Angushark/DB_team01/main/img/1.jpg",    tag: "機身" },
+      { item_id: "102", name: "Sony FE 24-70mm F2.8 GM II 鏡頭", rental: 800,  url: "https://raw.githubusercontent.com/Angushark/DB_team01/main/img/102.jpg",  tag: "鏡頭" },
+      { item_id: "101", name: "Manfrotto 190XPRO 專業三腳架",    rental: 200,  url: "https://raw.githubusercontent.com/Angushark/DB_team01/main/img/101.jpeg", tag: "腳架" },
+    ],
+  },
+};
 
 // ── Date filter helpers ──────────────────────────────────────────────────────
 function getDateStr(offsetDays = 0) {
@@ -67,14 +81,14 @@ async function fetchUnavailableIds() {
 }
 
 function dateFilteredItems() {
-  if (!state.filterFrom || !state.filterTo) return state.items;
+  if (!state.dateFilterActive) return state.items;
   return state.items.filter(p => !state.unavailableIds.has(String(p.item_id)));
 }
 
 function updateFilterCount() {
   const countEl = document.getElementById("filter-count");
   if (!countEl) return;
-  if (state.filterFrom && state.filterTo) {
+  if (state.dateFilterActive) {
     countEl.textContent = `共 ${dateFilteredItems().length} 項可租借`;
   } else {
     countEl.textContent = "";
@@ -122,8 +136,7 @@ function initRentPickers(blocked) {
         state.filterTo = fmtDate(next);
         returnPicker.setDate(next, false);
       }
-      await fetchUnavailableIds();
-      render();
+      if (state.dateFilterActive) { await fetchUnavailableIds(); render(); }
     },
   });
 
@@ -135,8 +148,7 @@ function initRentPickers(blocked) {
     onChange: async function(dates) {
       if (!dates[0]) return;
       state.filterTo = fmtDate(dates[0]);
-      await fetchUnavailableIds();
-      render();
+      if (state.dateFilterActive) { await fetchUnavailableIds(); render(); }
     },
   });
 
@@ -173,7 +185,6 @@ async function loadItems() {
     const data = await r.json();
     if (data.success) {
       state.items = data.items.map(transformItem);
-      console.log("[DEBUG] items sample:", state.items.slice(0, 3).map(p => ({ name: p.name, sub_type: p.sub_type, cat: p.cat })));
     }
   } catch (e) { console.error("loadItems failed", e); }
 }
@@ -198,7 +209,6 @@ function getFilteredProducts() {
     if (state.activeCat === "equipment" || state.activeCat === "accessory") {
       items = items.filter(p => p.cat === state.activeCat);
     } else {
-      console.log("[DEBUG] filtering by sub_type:", state.activeCat, "| available sub_types:", [...new Set(items.map(p => p.sub_type))]);
       items = items.filter(p => p.sub_type === state.activeCat);
     }
   }
@@ -228,12 +238,12 @@ function renderProductCard(p, compact) {
     : `<span class="card-img__emoji">${p.img}</span>`;
   const hint = inCart
     ? `<span style="font-size:11px;color:var(--green);font-weight:600;">✓ 已加入</span>`
-    : (available
+    : (state.dateFilterActive || available
       ? `<span style="font-size:11px;color:var(--amber);font-weight:600;">查看詳情 →</span>`
       : `<span style="font-size:11px;color:var(--t3);">${p.rent_state}</span>`);
+  const stateBadge = state.dateFilterActive ? "" : `<span class="badge-state badge-state--${stClass}"><span class="badge-state__dot"></span>${p.rent_state}</span>`;
   return `<a href="item.html?id=${p.id}" class="product-card${compact ? " compact" : ""}" style="text-decoration:none;color:inherit;display:block;">
-    <div class="card-img">${imgTag}
-      <span class="badge-state badge-state--${stClass}"><span class="badge-state__dot"></span>${p.rent_state}</span>${corner}
+    <div class="card-img">${imgTag}${stateBadge}${corner}
     </div>
     <div class="card-info">
       <div class="card-info__tags">
@@ -259,11 +269,6 @@ function renderBanner() {
   $("#hero-label").style.color = "rgba(255,255,255,0.7)";
   $("#hero-title").textContent = b.title;
   $("#hero-sub").textContent = b.subtitle;
-  const cta = $("#hero-cta");
-  cta.textContent = b.cta;
-  cta.style.background = "rgba(255,255,255,0.2)";
-  cta.style.color = "#fff";
-  cta.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
   $("#hero-dots").innerHTML = BANNERS.map((_, i) => {
     const active = i === state.bannerIdx;
     return `<button class="hero__dot hero__dot--${active ? "active" : "inactive"}" data-banner="${i}" style="background:${active ? "#fff" : "rgba(255,255,255,0.3)"}; width:${active ? 24 : 8}px;"></button>`;
@@ -316,7 +321,10 @@ function renderHomeView() {
   const ac = items.filter(p => p.item_type === "accessory");
   $("#promo-grid").innerHTML = PROMOS.map((promo, i) => {
     const bg = PROMO_OVERRIDES[i].bg;
-    return `<div class="promo-tile" style="background:${bg}"><div class="promo-tile__bg-icon">${promo.icon}</div><div class="promo-tile__label" style="color:rgba(255,255,255,0.7)">限定方案</div><h3 class="promo-tile__title">${promo.title}</h3><p class="promo-tile__sub">${promo.sub}</p></div>`;
+    const bundleAttr = promo.bundle ? ` data-bundle="${promo.bundle}"` : "";
+    const bundleCls  = promo.bundle ? " promo-tile--bundle" : "";
+    const hint = promo.bundle ? `<p class="promo-tile__hint">點擊查看套組內容 →</p>` : "";
+    return `<div class="promo-tile${bundleCls}" style="background:${bg}"${bundleAttr}><div class="promo-tile__bg-icon">${promo.icon}</div><div class="promo-tile__label" style="color:rgba(255,255,255,0.7)">限定方案</div><h3 class="promo-tile__title">${promo.title}</h3><p class="promo-tile__sub">${promo.sub}</p>${hint}</div>`;
   }).join("");
   $("#new-grid").innerHTML = items.slice(-4).map(p => renderProductCard(p)).join("");
   $("#equip-grid").innerHTML = eq.map(p => renderProductCard(p)).join("");
@@ -324,6 +332,94 @@ function renderHomeView() {
 }
 
 function render() { renderCatNav(); renderCartBadge(); renderBanner(); renderContent(); renderAuthButtons(); updateFilterCount(); }
+
+// ── Bundle Modal ──────────────────────────────────────────────────────────────
+function openBundleModal(bundleId) {
+  const bundle  = BUNDLES[bundleId];
+  if (!bundle) return;
+  const overlay = document.getElementById("bundle-overlay");
+  const box     = document.getElementById("bundle-modal-box");
+  const total   = bundle.items.reduce((s, it) => s + it.rental, 0);
+  const allInCart = bundle.items.every(it => state.cartItemIds.has(String(it.item_id)));
+
+  box.innerHTML = `
+    <button class="bundle-modal__close" id="bundle-close" aria-label="關閉">✕</button>
+    <div style="text-align:center;margin-bottom:20px;">
+      <h2 style="font-size:18px;font-weight:700;color:var(--t1);margin:0 0 4px;">${bundle.title}</h2>
+      <p style="font-size:12px;color:var(--t3);margin:0;">${bundle.sub}</p>
+    </div>
+    <div class="bundle-items-grid">
+      ${bundle.items.map(it => {
+        const inCart = state.cartItemIds.has(String(it.item_id));
+        return `<div class="bundle-item${inCart ? " in-cart" : ""}">
+          <div class="bundle-item__img">
+            <img src="${it.url}" alt="${it.name}" onerror="this.style.display='none'">
+          </div>
+          <div class="bundle-item__info">
+            ${inCart
+              ? `<div class="bundle-item__in-cart">✓ 已在購物車</div>`
+              : `<div class="bundle-item__tag">${it.tag}</div>`}
+            <div class="bundle-item__name">${it.name}</div>
+            <div class="bundle-item__price">NT$ ${it.rental.toLocaleString("zh-TW")}<span> /日</span></div>
+          </div>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="bundle-total">
+      <span style="font-size:13px;color:var(--t2);">套組每日合計</span>
+      <span style="font-size:18px;font-weight:700;color:var(--amber);">NT$ ${total.toLocaleString("zh-TW")}</span>
+    </div>
+    <button class="bundle-modal__btn${allInCart ? " all-added" : ""}" id="bundle-add-all"${allInCart ? " disabled" : ""}>
+      ${allInCart ? "✓ 已全部加入購物車" : "＋ 全部加入購物車"}
+    </button>`;
+
+  overlay.style.display = "flex";
+  document.body.style.overflow = "hidden";
+
+  document.getElementById("bundle-close").addEventListener("click", closeBundleModal);
+  overlay.addEventListener("click", e => { if (e.target === overlay) closeBundleModal(); });
+
+  const addBtn = document.getElementById("bundle-add-all");
+  if (addBtn && !allInCart) addBtn.addEventListener("click", () => addBundleToCart(bundleId));
+}
+
+function closeBundleModal() {
+  document.getElementById("bundle-overlay").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+async function addBundleToCart(bundleId) {
+  const bundle = BUNDLES[bundleId];
+  const user   = JSON.parse(localStorage.getItem("lensrent_user") || "null");
+  if (!user) {
+    closeBundleModal();
+    setTimeout(() => { window.location.href = "login.html?redirect=index.html"; }, 100);
+    return;
+  }
+
+  const btn = document.getElementById("bundle-add-all");
+  if (btn) { btn.disabled = true; btn.textContent = "加入中⋯"; }
+
+  let added = 0;
+  for (const it of bundle.items) {
+    if (state.cartItemIds.has(String(it.item_id))) continue;
+    try {
+      const r = await fetch("api/cart.php", {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "add", item_id: it.item_id, name: it.name, rental: it.rental }),
+      });
+      const data = await r.json();
+      if (data.success) { state.cartItemIds.add(String(it.item_id)); state.cartCount = data.count; added++; }
+    } catch (_) {}
+  }
+
+  closeBundleModal();
+  renderCartBadge();
+  render();
+  if (added > 0) showToast(`✓ 已加入 ${added} 件套組商品至購物車`);
+  else showToast("套組商品皆已在購物車中");
+}
 
 function initEvents() {
   const si = $("#search-input"), sc = $("#search-clear");
@@ -336,16 +432,33 @@ function initEvents() {
     if (e.target.id === "clear-filter") { state.activeCat = "all"; render(); }
   });
 
+  document.getElementById("promo-grid").addEventListener("click", e => {
+    const tile = e.target.closest(".promo-tile[data-bundle]");
+    if (tile) openBundleModal(tile.dataset.bundle);
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeBundleModal();
+  });
+
   const btnConfirm = $("#btn-filter-confirm");
   if (btnConfirm) {
     btnConfirm.addEventListener("click", async () => {
+      if (state.dateFilterActive) {
+        state.dateFilterActive = false;
+        state.unavailableIds = new Set();
+        btnConfirm.textContent = "確認篩選";
+        render();
+        return;
+      }
       if (!state.filterFrom || !state.filterTo) return;
+      state.dateFilterActive = true;
       btnConfirm.disabled = true;
       btnConfirm.textContent = "篩選中⋯";
       await fetchUnavailableIds();
       render();
       btnConfirm.disabled = false;
-      btnConfirm.textContent = "確認篩選";
+      btnConfirm.textContent = "取消篩選";
     });
   }
 }
@@ -354,7 +467,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   state.filterFrom = getDateStr(0);
   state.filterTo   = getDateStr(1);
 
-  await Promise.all([loadItems(), loadCart(), fetchUnavailableIds()]);
+  await Promise.all([loadItems(), loadCart()]);
 
   // Fetch blocked dates from items currently in cart
   let blocked = [];
