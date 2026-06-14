@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>註冊 — 10gear 拾光機</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
+</head>
+<body class="auth-page">
+
+  <!-- Header -->
+  <header style="background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px;">
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between;">
+      <a href="index.html" class="logo" style="text-decoration:none;"><img src="logo.png" alt="10gear" class="logo__img"><div class="logo__names"><span class="logo__zh">拾光機</span><span class="logo__en">10gear</span></div></a>
+      <a href="login.html" class="btn-login" style="text-decoration:none;">登入</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="auth-card">
+      <div class="auth-card__icon">📝</div>
+      <h1 class="auth-card__title">建立帳號</h1>
+      <p class="auth-card__sub">填寫基本資料即可開始租借攝影器材</p>
+
+      <form id="register-form" onsubmit="return false;">
+        <div class="form-group">
+          <label>使用者名稱 <span class="required">*</span></label>
+          <input type="text" class="form-input" id="inp-username" placeholder="例如：john_photo" required>
+        </div>
+        <div class="form-group">
+          <label>電子信箱 <span class="required">*</span></label>
+          <input type="email" class="form-input" id="inp-email" placeholder="example@mail.com" required>
+        </div>
+        <div class="form-group">
+          <label>密碼 <span class="required">*</span></label>
+          <input type="password" class="form-input" id="inp-password" placeholder="至少 6 位" minlength="6" required>
+        </div>
+        <div class="form-group">
+          <label>確認密碼 <span class="required">*</span></label>
+          <input type="password" class="form-input" id="inp-password2" placeholder="再次輸入密碼" required>
+        </div>
+        <div class="form-group">
+          <label>聯絡電話</label>
+          <input type="tel" class="form-input" id="inp-phone" placeholder="09xxxxxxxx（選填）">
+        </div>
+        <button type="submit" class="btn-primary" id="btn-submit">建立帳號</button>
+      </form>
+
+      <div class="auth-msg" id="msg"></div>
+      <p class="auth-footer-link">已有帳號？<a href="login.html">前往登入</a></p>
+    </div>
+  </main>
+
+  <script>
+    const msg = document.getElementById("msg");
+    function showMsg(text, type) {
+      msg.textContent = text;
+      msg.className = "auth-msg visible auth-msg--" + type;
+    }
+
+    document.getElementById("register-form").addEventListener("submit", async () => {
+      const username = document.getElementById("inp-username").value.trim();
+      const email = document.getElementById("inp-email").value.trim();
+      const password = document.getElementById("inp-password").value;
+      const password2 = document.getElementById("inp-password2").value;
+      const phone = document.getElementById("inp-phone").value.trim();
+
+      if (!username || !email || !password) { showMsg("請填寫所有必填欄位", "error"); return; }
+      if (password.length < 6) { showMsg("密碼長度至少 6 位", "error"); return; }
+      if (password !== password2) { showMsg("兩次輸入的密碼不一致", "error"); return; }
+
+      document.getElementById("btn-submit").disabled = true;
+      document.getElementById("btn-submit").textContent = "註冊中…";
+
+      try {
+        const res = await fetch("api/register.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password, phone_number: phone })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showMsg(data.message + "　即將跳轉至登入頁面⋯", "success");
+          setTimeout(() => window.location.href = "login.html", 2000);
+        } else {
+          showMsg(data.message, "error");
+        }
+      } catch (e) {
+        showMsg("連線失敗，請確認後端服務是否啟動", "error");
+      }
+
+      document.getElementById("btn-submit").disabled = false;
+      document.getElementById("btn-submit").textContent = "建立帳號";
+    });
+  </script>
+</body>
+</html>

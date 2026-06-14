@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>個人中心 — 10gear 拾光機</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
+  <style>
+    .profile-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; }
+    .profile-card__header { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
+    .profile-card__avatar { width:56px; height:56px; border-radius:50%; background:var(--amber-light); display:flex; align-items:center; justify-content:center; color:var(--amber); flex-shrink:0; border:2px solid rgba(217,119,6,0.2); }
+    .profile-card__name { font-size:20px; font-weight:700; }
+    .profile-card__id { font-size:12px; color:var(--t3); font-family:var(--font-mono); }
+    .profile-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .profile-info-item { padding:14px 16px; border-radius:12px; background:var(--bg); border:1px solid var(--border); }
+    .profile-info-item__label { font-size:11px; color:var(--t3); margin-bottom:4px; letter-spacing:0.5px; }
+    .profile-info-item__value { font-size:14px; font-weight:600; }
+    .role-badges { display:flex; gap:6px; margin-top:6px; }
+    .role-badge { font-size:10px; font-weight:700; padding:3px 10px; border-radius:999px; }
+    .role-badge--renter  { background:var(--green-bg); color:var(--green); }
+    .role-badge--provider{ background:var(--blue-bg); color:var(--blue); }
+    .role-badge--admin   { background:var(--amber-glow); color:var(--amber); }
+  </style>
+</head>
+<body>
+  <header style="background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px; position:sticky; top:0; z-index:50; height:57px; box-sizing:border-box;">
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between; height:100%;">
+      <a href="index.html" class="logo" style="text-decoration:none;"><img src="logo.png" alt="10gear" class="logo__img"><div class="logo__names"><span class="logo__zh">拾光機</span><span class="logo__en">10gear</span></div></a>
+      <div id="auth-buttons"></div>
+    </div>
+  </header>
+
+  <div class="member-page">
+  <div class="member-page__inner">
+    <!-- ── Sidebar ── -->
+    <aside class="member-sidebar" id="sidebar">
+      <div class="member-sidebar__user">
+        <div class="member-sidebar__avatar">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="member-sidebar__name" id="sb-name">—</div>
+        <div class="member-sidebar__id" id="sb-id">ID: —</div>
+      </div>
+      <nav class="member-sidebar__nav">
+        <a href="profile.html" class="member-sidebar__tab active" style="text-decoration:none;">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          我的帳戶
+        </a>
+        <a href="orders.html" class="member-sidebar__tab" style="text-decoration:none;">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+          我的訂單
+        </a>
+        <a href="wallet.html" class="member-sidebar__tab" style="text-decoration:none;">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z"/><circle cx="16" cy="14" r="1" fill="currentColor"/></svg>
+          我的錢包
+        </a>
+        <div id="provider-tab-wrap" style="display:none;">
+          <a href="become_provider.html" class="member-sidebar__tab" id="tab-become-provider" style="text-decoration:none; display:none;">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            申請成為出租方
+          </a>
+          <a href="provide_item.html" class="member-sidebar__tab" id="tab-provide-item" style="text-decoration:none; display:none;">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            上架品項
+          </a>
+        </div>
+        <div id="admin-tab-wrap" style="display:none;">
+          <a href="admin.html" class="member-sidebar__tab" style="text-decoration:none;">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+            管理後台
+          </a>
+        </div>
+      </nav>
+      <button class="member-sidebar__logout" id="btn-logout">登出</button>
+    </aside>
+
+    <!-- ── Content ── -->
+    <main class="member-main">
+      <div id="profile-content">
+        <div style="text-align:center; padding:60px 20px; color:var(--t3);">載入會員資料中⋯</div>
+      </div>
+    </main>
+  </div><!-- /member-page__inner -->
+  </div><!-- /member-page -->
+
+  <script>
+  const fmtMoney = n => `NT$ ${Number(n).toLocaleString("zh-TW")}`;
+
+  function initAuthHeader(user) {
+    const el = document.getElementById("auth-buttons");
+    if (!el) return;
+    el.innerHTML = user
+      ? `<span class="btn-user-menu"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${user.username}</span>`
+      : `<a href="login.html" class="btn-login">登入</a><a href="register.html" class="btn-register">註冊</a>`;
+  }
+
+  function initSidebar(member) {
+    const r = member.roles || {};
+    document.getElementById("sb-name").textContent = member.username;
+    document.getElementById("sb-id").textContent   = "ID: " + member.member_id;
+
+    const pt    = document.getElementById("provider-tab-wrap");
+    const tabBP = document.getElementById("tab-become-provider");
+    const tabPI = document.getElementById("tab-provide-item");
+    const at    = document.getElementById("admin-tab-wrap");
+    if (pt)    pt.style.display    = "block";
+    if (tabBP) tabBP.style.display = r.isProvider ? "none" : "flex";
+    if (tabPI) tabPI.style.display = r.isProvider ? "flex" : "none";
+    if (at)    at.style.display    = r.isAdmin    ? "block" : "none";
+  }
+
+  function renderProfile(member) {
+    const r = member.roles || {};
+    let roleBadges = '';
+    if (r.isAdmin)         roleBadges = '<span class="role-badge role-badge--admin">管理員 Admin</span>';
+    else if (r.isProvider) roleBadges = '<span class="role-badge role-badge--provider">出租方 Provider</span>';
+    else                   roleBadges = '<span class="role-badge role-badge--renter">租借者 Renter</span>';
+
+    document.getElementById("profile-content").innerHTML = `
+      <div class="profile-card">
+        <div class="profile-card__header">
+          <div class="profile-card__avatar">
+            <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <div class="profile-card__name">${member.username}</div>
+            <div class="profile-card__id">Member ID: ${member.member_id}</div>
+            <div class="role-badges">${roleBadges}</div>
+          </div>
+        </div>
+        <div class="profile-info-grid">
+          <div class="profile-info-item">
+            <div class="profile-info-item__label">電子信箱</div>
+            <div class="profile-info-item__value">${member.email}</div>
+          </div>
+          <div class="profile-info-item">
+            <div class="profile-info-item__label">聯絡電話</div>
+            <div class="profile-info-item__value">${member.phone_number || '未填寫'}</div>
+          </div>
+          <div class="profile-info-item">
+            <div class="profile-info-item__label">註冊日期</div>
+            <div class="profile-info-item__value">${member.reg_date}</div>
+          </div>
+          <div class="profile-info-item" style="cursor:pointer;" onclick="window.location.href='wallet.html'">
+            <div class="profile-info-item__label">錢包餘額</div>
+            <div class="profile-info-item__value" style="color:var(--amber); font-family:var(--font-mono);">
+              NT$ ${Number(member.balance || 0).toLocaleString('zh-TW')}
+              <span style="font-size:11px; color:var(--t3); font-family:var(--font-sans); margin-left:4px;">→ 前往錢包</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById("btn-logout").addEventListener("click", () => {
+    localStorage.removeItem("lensrent_user");
+    fetch("api/logout.php", { credentials: "same-origin" }).catch(() => {});
+    window.location.href = "index.html";
+  });
+
+  const localUser = JSON.parse(localStorage.getItem("lensrent_user") || "null");
+  initAuthHeader(localUser);
+
+  if (!localUser) {
+    document.getElementById("profile-content").innerHTML = `
+      <div style="text-align:center;padding:60px 20px;color:var(--t3);">
+        <p style="font-size:16px;font-weight:600;margin-bottom:8px;">請先登入以查看個人資料</p>
+        <a href="login.html" style="color:var(--amber);font-weight:600;">前往登入 →</a>
+      </div>`;
+  } else {
+    // 立即用 localStorage 初始化 sidebar，不等 API
+    initSidebar(localUser);
+
+    // 背景呼叫 API 取得最新資料（餘額、roles 等），更新後靜默刷新
+    fetch("api/profile.php", { credentials: "same-origin" })
+      .then(r => r.json())
+      .then(data => {
+        const member = data.success ? data.member : localUser;
+        if (data.success) localStorage.setItem("lensrent_user", JSON.stringify(member));
+        // 用最新資料更新 sidebar 與內容（roles 有異動時也能即時反映）
+        initSidebar(member);
+        renderProfile(member);
+      })
+      .catch(() => renderProfile(localUser));
+  }
+  </script>
+</body>
+</html>

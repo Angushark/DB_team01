@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訂單詳細 — 10gear 拾光機</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
+  <style>
+    .page-header { background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px; position:sticky; top:0; z-index:50; }
+    .page-header .inner { display:flex; align-items:center; justify-content:space-between; }
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 24px; margin-bottom:20px; }
+    .panel__title { font-size:14px; font-weight:700; color:var(--t1); margin-bottom:16px; }
+    .info-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+    .info-item__label { font-size:11px; color:var(--t3); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px; }
+    .info-item__value { font-size:14px; font-weight:600; color:var(--t1); }
+    .items-table { width:100%; border-collapse:collapse; }
+    .items-table th { font-size:11px; color:var(--t3); text-transform:uppercase; letter-spacing:1px; padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; }
+    .items-table td { padding:10px; border-bottom:1px solid var(--border); font-size:13px; color:var(--t2); }
+    .items-table tr:last-child td { border-bottom:none; }
+    .form-group { margin-bottom:12px; }
+    .form-group label { display:block; font-size:12px; font-weight:600; color:var(--t2); margin-bottom:5px; }
+    .form-input { width:100%; padding:8px 11px; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--t1); box-sizing:border-box; }
+    .form-input:focus { outline:none; border-color:var(--amber); }
+    .flatpickr-input { width:100%; padding:8px 11px; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--t1); box-sizing:border-box; cursor:pointer; }
+    .flatpickr-day.selected,.flatpickr-day.selected:hover { background:var(--amber); border-color:var(--amber); color:#fff; }
+    .btn-primary { padding:8px 18px; background:var(--amber); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; }
+    .btn-secondary { padding:8px 18px; background:var(--bg); color:var(--t2); border:1px solid var(--border); border-radius:8px; font-size:13px; cursor:pointer; text-decoration:none; display:inline-block; }
+    .btn-danger { padding:5px 12px; background:#fef2f2; color:var(--red,#dc2626); border:1px solid #fecaca; border-radius:6px; font-size:11px; cursor:pointer; }
+    .btn-danger:hover { background:var(--red,#dc2626); color:#fff; }
+    .msg-box { padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:12px; display:none; }
+    .msg-box.error { background:#fef2f2; color:var(--red); border:1px solid #fecaca; display:block; }
+    .msg-box.success { background:#f0fdf4; color:var(--green); border:1px solid #bbf7d0; display:block; }
+    .add-item-row { display:flex; gap:8px; align-items:center; margin-top:12px; }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="container inner">
+      <a href="index.html" class="logo" style="text-decoration:none;"><img src="logo.png" alt="10gear" class="logo__img"><div class="logo__names"><span class="logo__zh">拾光機</span><span class="logo__en">10gear</span></div></a>
+      <div id="auth-buttons"></div>
+    </div>
+  </header>
+
+  <main class="container" style="padding:28px 16px 60px;max-width:720px;">
+    <div id="detail-content">
+      <div style="text-align:center;padding:60px;color:var(--t3);">載入中⋯</div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
+  <script src="js/order_detail.js"></script>
+</body>
+</html>

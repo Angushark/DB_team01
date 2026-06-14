@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登入 — 10gear 拾光機</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
+</head>
+<body class="auth-page">
+
+  <!-- Header -->
+  <header style="background:var(--surface); border-bottom:1px solid var(--border); padding:14px 20px;">
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between;">
+      <a href="index.html" class="logo" style="text-decoration:none;"><img src="logo.png" alt="10gear" class="logo__img"><div class="logo__names"><span class="logo__zh">拾光機</span><span class="logo__en">10gear</span></div></a>
+      <a href="register.html" class="btn-register" style="text-decoration:none;">註冊帳號</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="auth-card">
+      <div class="auth-card__icon">🔐</div>
+      <h1 class="auth-card__title">會員登入</h1>
+      <p class="auth-card__sub">輸入您的會員編號與密碼</p>
+
+      <form id="login-form" onsubmit="return false;">
+        <div class="form-group">
+          <label>會員編號 (Member ID) <span class="required">*</span></label>
+          <input type="number" class="form-input" id="inp-member-id" placeholder="例如：1" min="1" required>
+        </div>
+        <div class="form-group">
+          <label>密碼 <span class="required">*</span></label>
+          <input type="password" class="form-input" id="inp-password" placeholder="請輸入密碼" required>
+        </div>
+        <button type="submit" class="btn-primary" id="btn-submit">登入</button>
+      </form>
+
+      <div class="auth-msg" id="msg"></div>
+      <p class="auth-footer-link">還沒有帳號？<a href="register.html">立即註冊</a></p>
+    </div>
+  </main>
+
+  <script>
+    const msg = document.getElementById("msg");
+    function showMsg(text, type) {
+      msg.textContent = text;
+      msg.className = "auth-msg visible auth-msg--" + type;
+    }
+
+    document.getElementById("login-form").addEventListener("submit", async () => {
+      const member_id = document.getElementById("inp-member-id").value;
+      const password = document.getElementById("inp-password").value;
+
+      if (!member_id || !password) { showMsg("請填寫所有欄位", "error"); return; }
+
+      document.getElementById("btn-submit").disabled = true;
+      document.getElementById("btn-submit").textContent = "登入中…";
+
+      try {
+        const res = await fetch("api/login.php", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ member_id: parseInt(member_id), password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem("lensrent_user", JSON.stringify(data.member));
+          showMsg("登入成功！即將跳轉⋯", "success");
+          const redirect = new URLSearchParams(location.search).get("redirect") || "profile.html";
+          setTimeout(() => window.location.href = redirect, 1000);
+        } else {
+          showMsg(data.message, "error");
+        }
+      } catch (e) {
+        showMsg("連線失敗，請確認後端服務是否啟動", "error");
+      }
+
+      document.getElementById("btn-submit").disabled = false;
+      document.getElementById("btn-submit").textContent = "登入";
+    });
+  </script>
+</body>
+</html>
