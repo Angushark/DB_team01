@@ -56,6 +56,10 @@
           <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           我的帳戶
         </a>
+        <a href="edit_profile.html" class="member-sidebar__tab" style="text-decoration:none;">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          修改個人資料
+        </a>
         <a href="orders.html" class="member-sidebar__tab" style="text-decoration:none;">
           <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
           我的訂單
@@ -90,12 +94,22 @@
         <div class="admin-tabs">
           <button class="admin-tab active" data-section="orders">訂單管理</button>
           <button class="admin-tab" data-section="items">品項管理</button>
+          <button class="admin-tab" data-section="review">待審核品項</button>
+          <button class="admin-tab" data-section="deletelog">取消紀錄</button>
         </div>
         <div class="admin-section active" id="sec-orders">
           <div id="orders-table-wrap"><p style="color:var(--t3);font-size:13px;">載入中⋯</p></div>
         </div>
         <div class="admin-section" id="sec-items">
           <div id="items-table-wrap"><p style="color:var(--t3);font-size:13px;">載入中⋯</p></div>
+        </div>
+        <div class="admin-section" id="sec-review">
+          <p style="font-size:13px;color:var(--t3);margin-bottom:16px;">以下為 Provider 上架、等待審核啟用的品項（狀態：審核中）</p>
+          <div id="review-table-wrap"><p style="color:var(--t3);font-size:13px;">載入中⋯</p></div>
+        </div>
+        <div class="admin-section" id="sec-deletelog">
+          <p style="font-size:13px;color:var(--t3);margin-bottom:16px;">記錄所有被取消的訂單</p>
+          <div id="deletelog-table-wrap"><p style="color:var(--t3);font-size:13px;">載入中⋯</p></div>
         </div>
       </div>
     </main>
@@ -285,7 +299,84 @@
       } catch(e) { fb.textContent = "失敗"; fb.className = "feedback err"; }
     }
 
-    if (r.isAdmin) { loadOrders(); loadItems(); }
+    if (r.isAdmin) { loadOrders(); loadItems(); loadReview(); loadDeleteLog(); }
+
+    // Load pending review items
+    async function loadReview() {
+      try {
+        const res  = await fetch("api/items.php", { credentials: "same-origin" });
+        const data = await res.json();
+        if (!data.success) return;
+        const pending = data.items.filter(i => i.rent_state === 'unavailable');
+        if (!pending.length) {
+          document.getElementById("review-table-wrap").innerHTML = '<p style="color:var(--t3);font-size:13px;padding:20px 0;">目前沒有待審核品項</p>';
+          return;
+        }
+        const rows = pending.map(i => `
+          <tr>
+            <td style="font-family:var(--font-mono)">${i.item_id}</td>
+            <td><strong>${i.name}</strong></td>
+            <td style="color:var(--t3)">${i.brand||''} ${i.model||''}</td>
+            <td style="font-family:var(--font-mono)">NT$ ${Number(i.rental||0).toLocaleString('zh-TW')}/日</td>
+            <td>
+              <button class="btn-apply" style="background:var(--green)" onclick="approveItem('${i.item_id}')">✓ 審核通過</button>
+              <span class="feedback" id="rfb-${i.item_id}"></span>
+            </td>
+          </tr>`).join('');
+        document.getElementById("review-table-wrap").innerHTML = `
+          <table>
+            <thead><tr><th>ID</th><th>名稱</th><th>品牌/型號</th><th>日租</th><th>操作</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      } catch(e) {
+        document.getElementById("review-table-wrap").innerHTML = '<p style="color:var(--red)">載入失敗</p>';
+      }
+    }
+
+    async function approveItem(iid) {
+      const fb = document.getElementById("rfb-" + iid);
+      try {
+        const res  = await fetch("api/admin_item.php", {
+          method:"POST", headers:{"Content-Type":"application/json"}, credentials:"same-origin",
+          body: JSON.stringify({ item_id: iid, rent_state: "available" })
+        });
+        const data = await res.json();
+        if (data.success) { fb.textContent="已啟用"; fb.className="feedback ok"; loadReview(); loadItems(); }
+        else { fb.textContent=data.message; fb.className="feedback err"; }
+      } catch(e) { fb.textContent="失敗"; fb.className="feedback err"; }
+    }
+
+    // Load delete log
+    async function loadDeleteLog() {
+      try {
+        const res  = await fetch("api/admin_delete_logs.php", { credentials: "same-origin" });
+        const data = await res.json();
+        if (!data.success) { document.getElementById("deletelog-table-wrap").innerHTML=`<p style="color:var(--red)">${data.message}</p>`; return; }
+        if (!data.logs.length) {
+          document.getElementById("deletelog-table-wrap").innerHTML='<p style="color:var(--t3);font-size:13px;padding:20px 0;">目前沒有刪除紀錄</p>'; return;
+        }
+        const ORDER_LABEL_LOG = { unpaid:'未付款', confirmed:'訂單成立', completed:'已完成', cancelled:'已取消' };
+        const rows = data.logs.map(l => {
+          const items = (() => { try { return JSON.parse(l.item_snapshot||'[]').join('、') || '—'; } catch(e){ return '—'; } })();
+          return `<tr>
+            <td style="font-family:var(--font-mono)">#${l.order_id}</td>
+            <td>${l.renter_name}</td>
+            <td>${l.rent_date} → ${l.return_date}</td>
+            <td style="font-family:var(--font-mono)">NT$ ${Number(l.total_rental||0).toLocaleString('zh-TW')}</td>
+            <td><span class="state-pill pill-${l.order_state}">${ORDER_LABEL_LOG[l.order_state]||l.order_state}</span></td>
+            <td style="font-size:12px;color:var(--t3)">${items}</td>
+            <td style="font-size:11px;color:var(--t3);white-space:nowrap">${l.deleted_at?.substring(0,16)||''}<br>by ${l.deleted_by_name}</td>
+          </tr>`;
+        }).join('');
+        document.getElementById("deletelog-table-wrap").innerHTML = `
+          <table>
+            <thead><tr><th>訂單</th><th>租借者</th><th>期間</th><th>金額</th><th>刪除時狀態</th><th>品項</th><th>刪除時間 / 操作者</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      } catch(e) {
+        document.getElementById("deletelog-table-wrap").innerHTML='<p style="color:var(--red)">載入失敗</p>';
+      }
+    }
   </script>
 </body>
 </html>

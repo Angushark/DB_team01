@@ -33,23 +33,26 @@ try {
     if ($isAdmin) {
         $allowed = in_array($order_state, ['confirmed', 'completed', 'cancelled']);
     } elseif ($isOwner) {
-        $allowed = ($order_state === 'cancelled' && $currentState === 'unpaid');
+        if ($currentState === 'unpaid') {
+            // Renter 可取消、或在 unpaid 狀態下修改日期（order_state 保持 unpaid）
+            $allowed = ($order_state === 'cancelled' || $order_state === 'unpaid');
+        }
     }
 
     if (!$allowed) send_json(['success' => false, 'message' => '權限不足或狀態轉換不允許']);
 
     // ── 更新訂單 ───────────────────────────────────────────────
-    if ($rent_date && $return_date && $isAdmin) {
-        if ($return_date < $rent_date) send_json(['success' => false, 'message' => '歸還日期不可早於租借日期']);
+    if ($rent_date && $return_date && ($isAdmin || ($isOwner && $currentState === 'unpaid'))) {
+        if ($return_date <= $rent_date) send_json(['success' => false, 'message' => '歸還日期必須晚於租借日期']);
         $sql = "UPDATE `Order` SET
             order_state='$order_state',
             rent_date='$rent_date',
             return_date='$return_date',
-            total_rental=(
+            total_rental=ROUND((
                 SELECT COALESCE(SUM(i.rental),0)
                 FROM `Contains` c JOIN `Item` i ON c.item_id=i.item_id
                 WHERE c.order_id='$oid'
-            ) * GREATEST(1, DATEDIFF('$return_date','$rent_date'))
+            ) * GREATEST(1, DATEDIFF('$return_date','$rent_date')))
         WHERE order_id='$oid'";
     } else {
         $sql = "UPDATE `Order` SET order_state='$order_state' WHERE order_id='$oid'";

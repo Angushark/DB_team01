@@ -19,6 +19,8 @@
     .btn-action--delete { background:#fef2f2; color:var(--red,#dc2626); }
     .btn-action--view:hover   { background:var(--amber); color:#fff; }
     .btn-action--delete:hover { background:var(--red,#dc2626); color:#fff; }
+    .btn-action--disabled { background:#f5f5f5; color:var(--t3); cursor:not-allowed; }
+    .btn-action--disabled:hover { background:#f5f5f5; color:var(--t3); }
   </style>
 </head>
 <body>
@@ -44,6 +46,10 @@
         <a href="profile.html" class="member-sidebar__tab" style="text-decoration:none;">
           <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           我的帳戶
+        </a>
+        <a href="edit_profile.html" class="member-sidebar__tab" style="text-decoration:none;">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          修改個人資料
         </a>
         <a href="orders.html" class="member-sidebar__tab active" style="text-decoration:none;">
           <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>

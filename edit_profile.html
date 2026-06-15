@@ -3,23 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>申請成為出租方 — 10gear 拾光機</title>
+  <title>修改個人資料 — 10gear 拾光機</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
   <style>
-    .form-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 28px 32px; box-shadow: var(--shadow-md);
-      max-width: 480px;
-    }
-    .form-card h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-    .form-card p.sub { font-size: 13px; color: var(--t3); margin-bottom: 24px; }
-    .notice-box { margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: #fffbeb; border: 1px solid #fde68a; }
-    .notice-box p { font-size: 12px; color: #92400e; line-height: 1.7; }
-    .notice-box ul { font-size: 12px; color: #92400e; line-height: 1.8; padding-left: 16px; }
-    .auth-msg { padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-top: 14px; display: none; }
-    .auth-msg--error   { background: var(--red-bg); color: var(--red); border: 1px solid rgba(220,38,38,0.15); display: block; }
-    .auth-msg--success { background: var(--green-bg); color: var(--green); border: 1px solid rgba(5,150,105,0.15); display: block; }
+    .edit-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px 32px; margin-bottom:20px; }
+    .edit-card h2 { font-size:16px; font-weight:700; margin-bottom:18px; }
+    .divider { border:none; border-top:1px solid var(--border); margin:20px 0; }
+    .msg { font-size:13px; margin-top:10px; display:none; }
+    .msg.ok  { color:var(--green); display:block; }
+    .msg.err { color:var(--red);   display:block; }
   </style>
 </head>
 <body>
@@ -46,7 +39,7 @@
           <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           我的帳戶
         </a>
-        <a href="edit_profile.html" class="member-sidebar__tab" style="text-decoration:none;">
+        <a href="edit_profile.html" class="member-sidebar__tab active" style="text-decoration:none;">
           <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           修改個人資料
         </a>
@@ -59,7 +52,7 @@
           我的錢包
         </a>
         <div id="provider-tab-wrap" style="display:none;">
-          <a href="become_provider.html" class="member-sidebar__tab active" id="tab-become-provider" style="text-decoration:none; display:none;">
+          <a href="become_provider.html" class="member-sidebar__tab" id="tab-become-provider" style="text-decoration:none; display:none;">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
             申請成為出租方
           </a>
@@ -80,45 +73,42 @@
 
     <!-- ── Content ── -->
     <main class="member-main">
-      <div class="form-card">
-        <h1>申請成為出租方</h1>
-        <p class="sub">填寫銀行帳號後即可開始上架器材，收取租借費用</p>
+      <h1 style="font-size:22px; font-weight:700; margin-bottom:24px;">修改個人資料</h1>
 
-        <div id="already-provider" style="display:none; padding:10px 14px; border-radius:10px; background:var(--green-bg); color:var(--green); border:1px solid rgba(5,150,105,0.15); font-size:13px; margin-bottom:16px;">
-          您已經是出租方身份，可直接前往上架器材。
+      <!-- 基本資料 -->
+      <div class="edit-card">
+        <h2>聯絡資訊</h2>
+        <div class="form-group">
+          <label style="display:block; font-size:12px; font-weight:600; color:var(--t2); margin-bottom:6px;">聯絡電話</label>
+          <input type="tel" class="form-input" id="inp-phone" placeholder="09xxxxxxxx" style="max-width:320px;">
         </div>
+        <button class="btn-primary" id="btn-save-info" style="margin-top:4px; max-width:160px;">儲存</button>
+        <div class="msg" id="msg-info"></div>
+      </div>
 
-        <form id="provider-form" onsubmit="return false;">
-          <div class="form-group">
-            <label>銀行帳號 <span class="required">*</span></label>
-            <input type="text" class="form-input" id="inp-bank" placeholder="例如：004-123456789012" required>
-            <p style="font-size:11px; color:var(--t3); margin-top:4px;">租借費用將匯入此帳號，請確認填寫正確</p>
-          </div>
-          <button type="submit" class="btn-primary" id="btn-submit">確認申請</button>
-        </form>
-
-        <div class="auth-msg" id="msg"></div>
-
-        <div class="notice-box">
-          <p style="font-weight:600; margin-bottom:4px;">出租方說明</p>
-          <ul>
-            <li>申請後即同時保有租借者身份</li>
-            <li>新上架品項預設狀態為「審核中」，待管理員啟用後才可租借</li>
-            <li>品項出租中時不可修改</li>
-          </ul>
+      <!-- 密碼 -->
+      <div class="edit-card">
+        <h2>變更密碼</h2>
+        <div class="form-group">
+          <label style="display:block; font-size:12px; font-weight:600; color:var(--t2); margin-bottom:6px;">目前密碼</label>
+          <input type="password" class="form-input" id="inp-cur-pw" placeholder="輸入目前密碼" style="max-width:320px;">
         </div>
+        <div class="form-group">
+          <label style="display:block; font-size:12px; font-weight:600; color:var(--t2); margin-bottom:6px;">新密碼（至少 6 位）</label>
+          <input type="password" class="form-input" id="inp-new-pw" placeholder="輸入新密碼" style="max-width:320px;">
+        </div>
+        <div class="form-group">
+          <label style="display:block; font-size:12px; font-weight:600; color:var(--t2); margin-bottom:6px;">確認新密碼</label>
+          <input type="password" class="form-input" id="inp-confirm-pw" placeholder="再次輸入新密碼" style="max-width:320px;">
+        </div>
+        <button class="btn-primary" id="btn-save-pw" style="margin-top:4px; max-width:160px;">更新密碼</button>
+        <div class="msg" id="msg-pw"></div>
       </div>
     </main>
   </div><!-- /member-page__inner -->
   </div><!-- /member-page -->
 
   <script>
-    const msgEl = document.getElementById("msg");
-    function showMsg(text, type) {
-      msgEl.textContent = text;
-      msgEl.className = "auth-msg auth-msg--" + type;
-    }
-
     const user = JSON.parse(localStorage.getItem("lensrent_user") || "null");
     if (!user) { window.location.href = "login.html"; }
 
@@ -140,6 +130,9 @@
     if (tabPI) tabPI.style.display = r.isProvider ? "flex" : "none";
     if (at)    at.style.display    = r.isAdmin    ? "block" : "none";
 
+    // Pre-fill phone
+    document.getElementById("inp-phone").value = user.phone_number || "";
+
     // Logout
     document.getElementById("btn-logout").addEventListener("click", () => {
       localStorage.removeItem("lensrent_user");
@@ -147,37 +140,47 @@
       window.location.href = "index.html";
     });
 
-    // Already a provider?
-    if (r.isProvider) {
-      document.getElementById("already-provider").style.display = "block";
-      document.getElementById("provider-form").style.display = "none";
+    // Helper
+    function showMsg(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = "msg " + type;
     }
 
-    document.getElementById("provider-form").addEventListener("submit", async () => {
-      const bank = document.getElementById("inp-bank").value.trim();
-      if (!bank) { showMsg("請填寫銀行帳號", "error"); return; }
-
-      document.getElementById("btn-submit").disabled = true;
-      document.getElementById("btn-submit").textContent = "申請中…";
-
+    async function saveProfile(payload, msgId, btnId) {
+      const btn = document.getElementById(btnId);
+      const orig = btn.textContent;
+      btn.disabled = true; btn.textContent = "儲存中⋯";
       try {
-        const res = await fetch("api/become_provider.php", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          credentials: "same-origin", body: JSON.stringify({ bank_account: bank })
+        const res  = await fetch("api/update_profile.php", {
+          method:"POST", credentials:"same-origin",
+          headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if (data.success) {
-          user.roles.isProvider = true;
+        showMsg(msgId, data.message, data.success ? "ok" : "err");
+        if (data.success && payload.phone_number !== undefined) {
+          user.phone_number = payload.phone_number;
           localStorage.setItem("lensrent_user", JSON.stringify(user));
-          showMsg("申請成功！即將跳轉至上架頁面⋯", "success");
-          setTimeout(() => window.location.href = "provide_item.html", 1500);
-        } else {
-          showMsg(data.message, "error");
         }
-      } catch(e) { showMsg("連線失敗", "error"); }
+      } catch(e) { showMsg(msgId, "連線失敗", "err"); }
+      btn.disabled = false; btn.textContent = orig;
+    }
 
-      document.getElementById("btn-submit").disabled = false;
-      document.getElementById("btn-submit").textContent = "確認申請";
+    // Save info
+    document.getElementById("btn-save-info").addEventListener("click", () => {
+      const phone = document.getElementById("inp-phone").value.trim();
+      saveProfile({ phone_number: phone }, "msg-info", "btn-save-info");
+    });
+
+    // Save password
+    document.getElementById("btn-save-pw").addEventListener("click", () => {
+      const cur_pw  = document.getElementById("inp-cur-pw").value;
+      const new_pw  = document.getElementById("inp-new-pw").value;
+      const conf_pw = document.getElementById("inp-confirm-pw").value;
+      if (!cur_pw || !new_pw) { showMsg("msg-pw", "請填寫目前密碼與新密碼", "err"); return; }
+      if (new_pw !== conf_pw) { showMsg("msg-pw", "兩次輸入的新密碼不一致", "err"); return; }
+      if (new_pw.length < 6)  { showMsg("msg-pw", "新密碼長度至少 6 位", "err"); return; }
+      saveProfile({ current_password: cur_pw, new_password: new_pw }, "msg-pw", "btn-save-pw");
     });
   </script>
 </body>

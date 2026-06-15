@@ -500,5 +500,14 @@ input::placeholder { color: var(--t3); }
   flex: 1;
   padding: 32px 28px 60px;
   min-width: 0;
-  max-width: 740px;
 }
+
+/* ── 移除數字輸入框的上下箭頭 ────────────────────────────────────── */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+/* 移除 number input 的上下箭頭 */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }

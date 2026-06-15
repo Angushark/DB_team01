@@ -25,20 +25,25 @@ try {
     $isAdmin = $conn->query("SELECT 1 FROM Administrator WHERE member_id=$mid")->num_rows > 0;
     $isOwner = ((int)$order['renter_id'] === $mid);
 
-    if (!$isAdmin && !$isOwner) send_json(['success' => false, 'message' => '無權限刪除此訂單']);
+    if (!$isAdmin && !$isOwner) send_json(['success' => false, 'message' => '無權限取消此訂單']);
 
-    // Renter 只能刪除未付款（unpaid）的訂單
+    // 已取消或已完成的訂單不可再取消
+    if (in_array($order['order_state'], ['cancelled', 'completed'])) {
+        send_json(['success' => false, 'message' => '此訂單狀態無法取消']);
+    }
+
+    // Renter 只能取消未付款（unpaid）的訂單
     if (!$isAdmin && $order['order_state'] !== 'unpaid') {
-        send_json(['success' => false, 'message' => '訂單已付款或成立，無法自行刪除']);
+        send_json(['success' => false, 'message' => '訂單已付款，無法自行取消']);
     }
 
     // 取得品項快照
-    $items_r = $conn->query("SELECT i.name FROM Contains c JOIN Item i ON c.item_id=i.item_id WHERE c.order_id='$oid'");
+    $items_r    = $conn->query("SELECT i.name FROM Contains c JOIN Item i ON c.item_id=i.item_id WHERE c.order_id='$oid'");
     $item_names = [];
     if ($items_r) while ($ir = $items_r->fetch_assoc()) $item_names[] = $ir['name'];
     $snapshot = json_encode($item_names, JSON_UNESCAPED_UNICODE);
 
-    // 寫入刪除紀錄
+    // 寫入取消紀錄
     $renter_id   = (int)$order['renter_id'];
     $state       = $conn->real_escape_string($order['order_state']);
     $total       = (int)$order['total_rental'];
@@ -50,12 +55,14 @@ try {
         (order_id, renter_id, deleted_by, order_state, total_rental, item_snapshot, rent_date, return_date)
         VALUES ('$oid', $renter_id, $mid, '$state', $total, '$snap', '$rent_date', '$return_date')");
 
-    // 執行刪除
-    $conn->query("DELETE FROM `Contains` WHERE order_id='$oid'");
-    $conn->query("DELETE FROM `Order`    WHERE order_id='$oid'");
-    sync_item_states($conn);
+    // 將訂單狀態改為 cancelled（保留資料，不刪除）
+    if (!$conn->query("UPDATE `Order` SET order_state='cancelled' WHERE order_id='$oid'")) {
+        send_json(['success' => false, 'message' => '取消失敗：' . $conn->error]);
+    }
 
-    send_json(['success' => true]);
+    sync_item_states($conn);
+    send_json(['success' => true, 'message' => '訂單已取消']);
+
 } catch (Throwable $e) {
     send_json(['success' => false, 'message' => '伺服器錯誤：' . $e->getMessage()]);
 }

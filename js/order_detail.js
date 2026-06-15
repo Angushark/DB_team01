@@ -67,6 +67,33 @@ function renderDetail(order) {
       </div>
     </div>` : "";
 
+  // ── Renter 修改日期面板：僅限 unpaid ─────────────────────────────────
+  const renterEditPanel = (!isAdmin && isOwner && order.order_state === 'unpaid') ? `
+    <div class="panel" id="renter-edit-panel">
+      <div class="panel__title">修改租借日期</div>
+      <div id="renter-edit-msg" class="msg-box"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>租借日期</label>
+          <input type="text" id="renter-edit-rent" class="flatpickr-input" value="${order.rent_date}" readonly>
+        </div>
+        <div class="form-group">
+          <label>歸還日期</label>
+          <input type="text" id="renter-edit-return" class="flatpickr-input" value="${order.return_date}" readonly>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button id="btn-renter-save" class="btn-primary">儲存日期</button>
+        <a href="orders.html" class="btn-secondary">取消</a>
+      </div>
+    </div>` : "";
+
+  // ── 已付款提示（非 Admin）────────────────────────────────────────────
+  const paidNotice = (!isAdmin && isOwner && (order.order_state === 'confirmed' || order.order_state === 'completed')) ? `
+    <div class="panel" style="background:#fff7ed;border-color:#fed7aa;">
+      <p style="font-size:13px;color:#92400e;font-weight:600;">訂單已付款，無法修改或刪除</p>
+    </div>` : "";
+
   // ── Admin 編輯面板 ────────────────────────────────────────────────────
   const editPanel = isAdmin ? `
     <div class="panel">
@@ -115,6 +142,8 @@ function renderDetail(order) {
     </div>
 
     ${payPanel}
+    ${renterEditPanel}
+    ${paidNotice}
     ${editPanel}
 
     <div class="panel">
@@ -169,6 +198,46 @@ function renderDetail(order) {
       } catch(e) {
         showMsg("pay-msg", "網路錯誤", "error");
         btn.disabled = false; btn.textContent = "確認付款";
+      }
+    });
+  }
+
+  // ── Renter 修改日期邏輯（unpaid 才顯示）────────────────────────────
+  if (!isAdmin && isOwner && order.order_state === 'unpaid') {
+    const renterRentPicker   = flatpickr("#renter-edit-rent", {
+      dateFormat: "Y-m-d", altInput: true, altFormat: "Y年n月j日",
+      defaultDate: order.rent_date, minDate: "today",
+      onChange: (d) => { if (d[0]) renterReturnPicker.set("minDate", d[0]); },
+    });
+    const renterReturnPicker = flatpickr("#renter-edit-return", {
+      dateFormat: "Y-m-d", altInput: true, altFormat: "Y年n月j日",
+      defaultDate: order.return_date, minDate: order.rent_date,
+    });
+
+    document.getElementById("btn-renter-save").addEventListener("click", async () => {
+      const btn         = document.getElementById("btn-renter-save");
+      const rent_date   = document.getElementById("renter-edit-rent").value;
+      const return_date = document.getElementById("renter-edit-return").value;
+      if (!rent_date || !return_date) { showMsg("renter-edit-msg", "請選擇日期", "error"); return; }
+      if (return_date <= rent_date)   { showMsg("renter-edit-msg", "歸還日期必須晚於租借日期", "error"); return; }
+
+      btn.disabled = true; btn.textContent = "儲存中⋯";
+      try {
+        const r    = await fetch("api/update_order.php", {
+          method: "POST", credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order_id, rent_date, return_date, order_state: order.order_state }),
+        });
+        const data = await r.json();
+        if (data.success) {
+          loadDetail();
+        } else {
+          showMsg("renter-edit-msg", data.message || "更新失敗", "error");
+          btn.disabled = false; btn.textContent = "儲存日期";
+        }
+      } catch(e) {
+        showMsg("renter-edit-msg", "網路錯誤", "error");
+        btn.disabled = false; btn.textContent = "儲存日期";
       }
     });
   }

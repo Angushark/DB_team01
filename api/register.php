@@ -30,9 +30,12 @@ if ($check->num_rows > 0) {
 }
 $check->close();
 
+// 密碼 bcrypt 加密
+$hashed   = password_hash($password, PASSWORD_BCRYPT);
 $reg_date = date('Y-m-d');
+
 $stmt = $conn->prepare("INSERT INTO Member (username, email, reg_date, password, phone_number) VALUES (?, ?, ?, ?, ?)");
-$stmt->bind_param("sssss", $username, $email, $reg_date, $password, $phone);
+$stmt->bind_param("sssss", $username, $email, $reg_date, $hashed, $phone);
 if (!$stmt->execute()) {
     echo json_encode(['success' => false, 'message' => '註冊失敗：' . $stmt->error]);
     $stmt->close(); exit;
@@ -40,8 +43,6 @@ if (!$stmt->execute()) {
 $member_id = $stmt->insert_id;
 $stmt->close();
 
-// Renter 已由 TRIGGER trg_auto_renter 自動插入
-// 此處保留 INSERT IGNORE 作為保險
 $conn->query("INSERT IGNORE INTO Renter (member_id) VALUES ($member_id)");
 
 echo json_encode([

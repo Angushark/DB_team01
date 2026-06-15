@@ -21,12 +21,12 @@
     <div class="auth-card">
       <div class="auth-card__icon">🔐</div>
       <h1 class="auth-card__title">會員登入</h1>
-      <p class="auth-card__sub">輸入您的會員編號與密碼</p>
+      <p class="auth-card__sub">輸入您的電子信箱與密碼</p>
 
       <form id="login-form" onsubmit="return false;">
         <div class="form-group">
-          <label>會員編號 (Member ID) <span class="required">*</span></label>
-          <input type="number" class="form-input" id="inp-member-id" placeholder="例如：1" min="1" required>
+          <label>電子信箱 <span class="required">*</span></label>
+          <input type="email" class="form-input" id="inp-email" placeholder="example@mail.com" required>
         </div>
         <div class="form-group">
           <label>密碼 <span class="required">*</span></label>
@@ -48,10 +48,10 @@
     }
 
     document.getElementById("login-form").addEventListener("submit", async () => {
-      const member_id = document.getElementById("inp-member-id").value;
+      const email    = document.getElementById("inp-email").value.trim();
       const password = document.getElementById("inp-password").value;
 
-      if (!member_id || !password) { showMsg("請填寫所有欄位", "error"); return; }
+      if (!email || !password) { showMsg("請填寫所有欄位", "error"); return; }
 
       document.getElementById("btn-submit").disabled = true;
       document.getElementById("btn-submit").textContent = "登入中…";
@@ -61,7 +61,7 @@
           method: "POST",
           credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ member_id: parseInt(member_id), password })
+          body: JSON.stringify({ email, password })
         });
         const data = await res.json();
 

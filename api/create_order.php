@@ -60,6 +60,23 @@ try {
         }
     }
 
+    // Provider 不可租借自己上架的品項
+    $item_ids_arr = array_column($cart, 'item_id');
+    $ph_self = implode(',', array_fill(0, count($item_ids_arr), '?'));
+    $types_self = str_repeat('s', count($item_ids_arr)) . 'i';
+    $stmt_self = $conn->prepare("SELECT item_id FROM Provide WHERE item_id IN ($ph_self) AND member_id=?");
+    if ($stmt_self) {
+        $self_params = array_merge($item_ids_arr, [$mid]);
+        $stmt_self->bind_param($types_self, ...$self_params);
+        $stmt_self->execute();
+        $self_r = $stmt_self->get_result();
+        if ($self_r && $self_r->num_rows > 0) {
+            $self_item = $self_r->fetch_assoc()['item_id'];
+            send_json(['success' => false, 'message' => "您無法租借自己上架的品項（品項編號：$self_item）"]);
+        }
+        $stmt_self->close();
+    }
+
     // 確認日期無衝突（只檢查 unpaid/confirmed 的訂單）
     $item_ids_arr = array_column($cart, 'item_id');
     $ph           = implode(',', array_fill(0, count($item_ids_arr), '?'));
