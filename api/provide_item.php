@@ -25,12 +25,16 @@ $data          = json_decode(file_get_contents('php://input'), true);
 $name          = trim($data['name']          ?? '');
 $brand         = trim($data['brand']         ?? '');
 $model         = trim($data['model']         ?? '');
-$type          = trim($data['type']          ?? '');
 $description   = trim($data['description']   ?? '');
 $rental        = (int)round(floatval($data['rental'] ?? 0));
 $item_subtype  = trim($data['item_subtype']  ?? '');
 $item_category = trim($data['item_category'] ?? '');
 $url           = trim($data['url']           ?? '');
+$type          = ($item_category === 'equipment') ? 'Equipment' : 'Accessory';
+$specs_raw     = $data['specs'] ?? null;
+$specs_sql     = ($specs_raw && is_array($specs_raw) && count($specs_raw) > 0)
+    ? "'" . $conn->real_escape_string(json_encode($specs_raw, JSON_UNESCAPED_UNICODE)) . "'"
+    : 'NULL';
 
 if (!$name || !$rental || !$item_category) {
     echo json_encode(['success' => false, 'message' => '名稱、每日租金、品項類別為必填']); exit;
@@ -59,15 +63,15 @@ $r2  = $conn->real_escape_string((string)$rental);
 $iid = $conn->real_escape_string($item_id);
 
 // 新品項預設 unavailable
-if (!$conn->query("INSERT INTO Item (item_id, name, brand, model, type, description, rent_state, rental, url) VALUES ('$iid','$n','$b','$m','$t','$d','unavailable',$r2,'$u')")) {
+if (!$conn->query("INSERT INTO Item (item_id, name, brand, model, type, description, rent_state, rental, url, specs) VALUES ('$iid','$n','$b','$m','$t','$d','unavailable',$r2,'$u',$specs_sql)")) {
     echo json_encode(['success' => false, 'message' => '新增品項失敗：' . $conn->error]); exit;
 }
 
 // 插入子表 Equipment / Accessory
 try {
     if ($item_category === 'equipment') {
-        $valid_eq = ['camera','drone','computer','gimbal','lighting','audio'];
-        $et = (is_string($item_subtype) && in_array($item_subtype, $valid_eq, true)) ? $item_subtype : 'camera';
+        $valid_eq = ['digital_camera','film_camera','instant_camera','action_camera','pocket_camera','drone','gimbal','360_camera','computer','lighting','audio'];
+        $et = (is_string($item_subtype) && in_array($item_subtype, $valid_eq, true)) ? $item_subtype : 'digital_camera';
         $et = $conn->real_escape_string($et);
         if (!$conn->query("INSERT INTO Equipment (item_id, equipment_type) VALUES ('$iid','$et')")) {
             // 子表失敗：回滾 Item 插入
@@ -88,8 +92,14 @@ try {
     echo json_encode(['success' => false, 'message' => '品項類型寫入失敗：' . $e->getMessage()]); exit;
 }
 
-// 建立 Provide 關聯（TRIGGER 會再次設 unavailable，無副作用）
-$conn->query("INSERT INTO Provide (member_id, item_id) VALUES ($mid,'$iid')");
+// 建立 Provide 關聯
+if (!$conn->query("INSERT INTO Provide (member_id, item_id) VALUES ($mid,'$iid')")) {
+    // 回滾已插入的子表和 Item
+    $conn->query("DELETE FROM Equipment WHERE item_id='$iid'");
+    $conn->query("DELETE FROM Accessory WHERE item_id='$iid'");
+    $conn->query("DELETE FROM Item WHERE item_id='$iid'");
+    echo json_encode(['success' => false, 'message' => '建立出租關聯失敗：' . $conn->error]); exit;
+}
 
 echo json_encode([
     'success' => true,

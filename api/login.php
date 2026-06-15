@@ -1,4 +1,6 @@
 <?php
+ini_set('session.gc_maxlifetime', 86400 * 7);
+session_set_cookie_params(86400 * 7, '/');
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 include(__DIR__ . '/../db_config.php');

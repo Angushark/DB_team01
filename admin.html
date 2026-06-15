@@ -251,12 +251,12 @@
       } catch(e) { fb.textContent = "失敗"; fb.className = "feedback err"; }
     }
 
-    // Load Items
+    // Load Items（所有品項含 unavailable）
     async function loadItems() {
       try {
-        const res  = await fetch("api/items.php", { credentials: "same-origin" });
+        const res  = await fetch("api/admin_item.php", { credentials: "same-origin" });
         const data = await res.json();
-        if (!data.success) return;
+        if (!data.success) { document.getElementById("items-table-wrap").innerHTML = `<p style="color:var(--red)">${data.message}</p>`; return; }
 
         const rows = data.items.map(i => `
           <tr>
@@ -304,9 +304,9 @@
     // Load pending review items
     async function loadReview() {
       try {
-        const res  = await fetch("api/items.php", { credentials: "same-origin" });
+        const res  = await fetch("api/admin_item.php", { credentials: "same-origin" });
         const data = await res.json();
-        if (!data.success) return;
+        if (!data.success) { document.getElementById("review-table-wrap").innerHTML = `<p style="color:var(--red)">${data.message}</p>`; return; }
         const pending = data.items.filter(i => i.rent_state === 'unavailable');
         if (!pending.length) {
           document.getElementById("review-table-wrap").innerHTML = '<p style="color:var(--t3);font-size:13px;padding:20px 0;">目前沒有待審核品項</p>';
@@ -318,19 +318,27 @@
             <td><strong>${i.name}</strong></td>
             <td style="color:var(--t3)">${i.brand||''} ${i.model||''}</td>
             <td style="font-family:var(--font-mono)">NT$ ${Number(i.rental||0).toLocaleString('zh-TW')}/日</td>
+            <td style="font-size:12px;color:var(--t3)">${i.provider_name || '—'}</td>
             <td>
-              <button class="btn-apply" style="background:var(--green)" onclick="approveItem('${i.item_id}')">✓ 審核通過</button>
+              <button class="btn-apply" style="background:var(--green);margin-right:6px;" onclick="approveItem('${i.item_id}')">✓ 審核通過</button>
+              <button class="btn-apply" style="background:#dc2626;" onclick="rejectItem('${i.item_id}')">✕ 退回</button>
               <span class="feedback" id="rfb-${i.item_id}"></span>
             </td>
           </tr>`).join('');
         document.getElementById("review-table-wrap").innerHTML = `
           <table>
-            <thead><tr><th>ID</th><th>名稱</th><th>品牌/型號</th><th>日租</th><th>操作</th></tr></thead>
+            <thead><tr><th>ID</th><th>名稱</th><th>品牌/型號</th><th>日租</th><th>出租方</th><th>操作</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>`;
       } catch(e) {
         document.getElementById("review-table-wrap").innerHTML = '<p style="color:var(--red)">載入失敗</p>';
       }
+    }
+
+    async function rejectItem(iid) {
+      const fb = document.getElementById("rfb-" + iid);
+      if (!confirm(`確定要退回品項 ${iid} 嗎？品項將維持「審核中」狀態。`)) return;
+      fb.textContent = "已退回（維持審核中）"; fb.className = "feedback ok";
     }
 
     async function approveItem(iid) {

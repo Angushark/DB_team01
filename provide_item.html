@@ -125,16 +125,17 @@
             </div>
           </div>
           <div class="form-group">
-            <label>種類描述</label>
-            <input type="text" class="form-input" id="inp-type" placeholder="例如：微單眼、腳架">
-          </div>
-          <div class="form-group">
             <label>品項說明</label>
             <input type="text" class="form-input" id="inp-desc" placeholder="例如：2022年出廠，狀況良好">
           </div>
           <div class="form-group">
             <label>圖片網址</label>
             <input type="text" class="form-input" id="inp-url" placeholder="https://...（選填）">
+          </div>
+          <div class="form-group">
+            <label>規格 Specs</label>
+            <div id="specs-editor" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <button type="button" id="btn-add-spec" style="margin-top:8px;font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--t2);cursor:pointer;display:inline-flex;align-items:center;gap:4px;">＋ 新增規格欄位</button>
           </div>
           <button type="submit" class="btn-primary" id="btn-submit">送出上架申請</button>
         </form>
@@ -163,12 +164,15 @@
     };
     const SUBTYPES = {
       equipment: [
-        { value: 'camera',   label: '相機 Camera' },
-        { value: 'drone',    label: '無人機 Drone' },
-        { value: 'computer', label: '電腦 Computer' },
-        { value: 'gimbal',   label: '雲台 Gimbal' },
-        { value: 'lighting', label: '燈光 Lighting' },
-        { value: 'audio',    label: '音訊 Audio' },
+        { value: 'digital_camera', label: '數位相機 Digital Camera' },
+        { value: 'film_camera',    label: '底片相機 Film Camera' },
+        { value: 'instant_camera', label: '拍立得 Instant Camera' },
+        { value: 'action_camera',  label: '運動相機 Action Camera' },
+        { value: 'drone',          label: '無人機 Drone' },
+        { value: 'gimbal',         label: '雲台 Gimbal' },
+        { value: 'computer',       label: '電腦 Computer' },
+        { value: 'lighting',       label: '燈光 Lighting' },
+        { value: 'audio',          label: '音訊 Audio' },
       ],
       accessory: [
         { value: 'lens',    label: '鏡頭 Lens' },
@@ -217,6 +221,20 @@
       });
     });
 
+    // Specs editor
+    function addSpecRow(key = '', value = '') {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:8px;align-items:center;';
+      row.innerHTML = `
+        <input type="text" class="form-input spec-key" placeholder="規格名稱（例：感光元件）" value="${key}" style="flex:1;min-width:0;">
+        <input type="text" class="form-input spec-val" placeholder="內容（例：全片幅）" value="${value}" style="flex:2;min-width:0;">
+        <button type="button" style="flex-shrink:0;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--t3);cursor:pointer;font-size:14px;">×</button>
+      `;
+      row.querySelector('button').addEventListener('click', () => row.remove());
+      document.getElementById('specs-editor').appendChild(row);
+    }
+    document.getElementById('btn-add-spec').addEventListener('click', () => addSpecRow());
+
     // Msg helper
     const msgEl = document.getElementById("msg");
     function showMsg(text, type) {
@@ -226,16 +244,23 @@
 
     // Submit
     document.getElementById("provide-form").addEventListener("submit", async () => {
+      const specs = {};
+      document.querySelectorAll('#specs-editor > div').forEach(row => {
+        const k = row.querySelector('.spec-key').value.trim();
+        const v = row.querySelector('.spec-val').value.trim();
+        if (k) specs[k] = v;
+      });
+
       const payload = {
         item_category: document.getElementById("inp-category").value,
         item_subtype:  document.getElementById("inp-subtype").value,
         name:          document.getElementById("inp-name").value.trim(),
         brand:         document.getElementById("inp-brand").value.trim(),
         model:         document.getElementById("inp-model").value.trim(),
-        type:          document.getElementById("inp-type").value.trim(),
         description:   document.getElementById("inp-desc").value.trim(),
         rental:        Math.round(parseFloat(document.getElementById("inp-rental").value)),
         url:           document.getElementById("inp-url").value.trim(),
+        specs:         Object.keys(specs).length > 0 ? specs : null,
       };
       if (!payload.item_category || !payload.name || !payload.rental) {
         showMsg("請填寫品項類別、名稱與租金", "error"); return;
@@ -251,8 +276,17 @@
           credentials: "same-origin", body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if (data.success) { showMsg(data.message, "success"); document.getElementById("provide-form").reset(); loadMyItems(); }
-        else { showMsg(data.message, "error"); }
+        if (data.success) {
+          showMsg(data.message, "success");
+          document.getElementById("provide-form").reset();
+          document.getElementById("specs-editor").innerHTML = "";
+          loadMyItems();
+        } else if (data.message === "請先登入") {
+          localStorage.removeItem("lensrent_user");
+          window.location.href = "login.html?redirect=provide_item.html";
+        } else {
+          showMsg(data.message, "error");
+        }
       } catch(e) { showMsg("連線失敗", "error"); }
       document.getElementById("btn-submit").disabled = false;
       document.getElementById("btn-submit").textContent = "送出上架申請";
