@@ -19,6 +19,9 @@ if (!$username || !$email || !$password) {
 if (strlen($password) < 6) {
     echo json_encode(['success' => false, 'message' => '密碼長度至少 6 位']); exit;
 }
+if ($phone !== '' && !preg_match('/^09\d{8}$/', $phone)) {
+    echo json_encode(['success' => false, 'message' => '電話格式錯誤，請輸入 09xxxxxxxx（10 位數字）']); exit;
+}
 
 $check = $conn->prepare("SELECT member_id FROM Member WHERE username = ? OR email = ?");
 $check->bind_param("ss", $username, $email);

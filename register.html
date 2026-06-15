@@ -69,6 +69,7 @@
       if (!username || !email || !password) { showMsg("請填寫所有必填欄位", "error"); return; }
       if (password.length < 6) { showMsg("密碼長度至少 6 位", "error"); return; }
       if (password !== password2) { showMsg("兩次輸入的密碼不一致", "error"); return; }
+      if (phone && !/^09\d{8}$/.test(phone)) { showMsg("電話格式錯誤，請輸入 09xxxxxxxx（10 位數字）", "error"); return; }
 
       document.getElementById("btn-submit").disabled = true;
       document.getElementById("btn-submit").textContent = "註冊中…";

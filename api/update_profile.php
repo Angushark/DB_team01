@@ -20,6 +20,9 @@ $sets = [];
 
 // 更新電話
 if ($phone !== '') {
+    if (!preg_match('/^09\d{8}$/', $phone)) {
+        echo json_encode(['success' => false, 'message' => '電話格式錯誤，請輸入 09xxxxxxxx（10 位數字）']); exit;
+    }
     $p = $conn->real_escape_string($phone);
     $sets[] = "phone_number='$p'";
 }

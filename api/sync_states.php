@@ -4,6 +4,12 @@
 
 if (!function_exists('sync_item_states')) {
     function sync_item_states($conn) {
+        // 自動完成：confirmed 訂單已過歸還日期 → completed
+        $conn->query(
+            "UPDATE `Order` SET order_state='completed'
+             WHERE order_state='confirmed' AND return_date < CURDATE()"
+        );
+        // 同步 item 狀態（completed 訂單不再佔用 item）
         $conn->query(
             "UPDATE Item SET rent_state = CASE
                WHEN EXISTS (

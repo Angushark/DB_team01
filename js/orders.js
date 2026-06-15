@@ -86,6 +86,7 @@ async function cancelOrder(order_id, btn) {
       if (btn) { btn.disabled = false; btn.textContent = "取消訂單"; }
     }
   } catch (e) {
+    alert("網路錯誤，請重試");
     if (btn) { btn.disabled = false; btn.textContent = "取消訂單"; }
   }
 }

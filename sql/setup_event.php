@@ -19,11 +19,14 @@ $r = $conn->query("SHOW VARIABLES LIKE 'event_scheduler'");
 $val = $r ? $r->fetch_assoc()['Value'] : '?';
 $steps[] = ["event_scheduler 目前狀態 = $val", true, ''];
 
-// 3. 建立 MySQL EVENT（若已存在則不重建）
-$sql = "CREATE EVENT IF NOT EXISTS `evt_sync_item_states`
+// 3. 建立 MySQL EVENT（重建以確保包含最新邏輯）
+$conn->query("DROP EVENT IF EXISTS `evt_sync_item_states`");
+$sql = "CREATE EVENT `evt_sync_item_states`
 ON SCHEDULE EVERY 1 DAY
 STARTS (CURRENT_DATE + INTERVAL 1 DAY)
-DO
+DO BEGIN
+  UPDATE `Order` SET order_state='completed'
+    WHERE order_state='confirmed' AND return_date < CURDATE();
   UPDATE Item SET rent_state = CASE
     WHEN EXISTS (
       SELECT 1 FROM `Contains` c
@@ -35,7 +38,8 @@ DO
     ) THEN 'rented'
     ELSE 'available'
   END
-  WHERE rent_state IN ('available','rented')";
+  WHERE rent_state IN ('available','rented');
+END";
 
 $ok = $conn->query($sql);
 $steps[] = ['CREATE EVENT evt_sync_item_states', $ok, $conn->error];
@@ -45,7 +49,11 @@ $r2 = $conn->query("SHOW EVENTS WHERE Name = 'evt_sync_item_states'");
 $exists = $r2 && $r2->num_rows > 0;
 $steps[] = ['驗證 EVENT 存在', $exists, $exists ? '' : 'EVENT 未找到（可能需要 EVENT 權限或 event_scheduler 未啟用）'];
 
-// 5. 立即執行一次同步（與 EVENT 相同的 SQL）
+// 5. 立即執行一次 auto-complete + 同步
+$ok5a = $conn->query("UPDATE `Order` SET order_state='completed' WHERE order_state='confirmed' AND return_date < CURDATE()");
+$completed_rows = $conn->affected_rows;
+$steps[] = ["立即自動完成訂單（confirmed+過期）→ completed（影響 {$completed_rows} 筆）", $ok5a, $conn->error];
+
 $ok5 = $conn->query(
     "UPDATE Item SET rent_state = CASE
        WHEN EXISTS (

@@ -172,6 +172,7 @@ async function removeItem(item_id, btn) {
       if (btn) { btn.disabled = false; btn.textContent = "移除"; }
     }
   } catch (e) {
+    showMsg("order-msg", "網路錯誤，請重試", "error");
     if (btn) { btn.disabled = false; btn.textContent = "移除"; }
   }
 }
@@ -193,6 +194,7 @@ async function clearCart() {
       if (clearBtn) { clearBtn.disabled = false; clearBtn.textContent = "清空清單"; }
     }
   } catch (e) {
+    showMsg("order-msg", "網路錯誤，請重試", "error");
     if (clearBtn) { clearBtn.disabled = false; clearBtn.textContent = "清空清單"; }
   }
 }
